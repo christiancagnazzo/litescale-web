@@ -14,9 +14,11 @@ def project_dir(project_id):
     return join(PROJECT_ROOT, str(project_id))
     # Return path to the project directory
 
+
 def gold_file(project_id):
     return join(project_dir(project_id), "gold.tsv")
     # Return path to the gold file
+
 
 def project_list(user):
     db = Dbconnect()
@@ -38,6 +40,17 @@ def insert_user(user, password):
     else:
         return ERROR, "User not entered: " + result.msg
     # Insert a new user into the database
+
+
+def search_user(user):
+    db = Dbconnect()
+    condition = "Email = %s"
+    result = db.select('_User', condition, 'Email', 'Password', Email=user)
+    db.close()
+    if not result:
+        return ERROR, "User not found"
+    return NOT_ERROR, result
+    # Check login
 
 
 def delete_user(user):
@@ -160,7 +173,7 @@ def get_project(project_id):
                        'ReplicateInstances',
                        'ProjectOwner',
                        ProjectId=project_id)
-    
+
     project_dict = {
         "project_name": result[0][0],
         "phenomenon": result[0][1],

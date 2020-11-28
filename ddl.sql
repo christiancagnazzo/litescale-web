@@ -1,6 +1,6 @@
 create table _User (
     Email varchar(35),
-    Password varchar(35),
+    Password varchar(200),
     primary key (Email)
 );
 

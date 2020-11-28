@@ -1,0 +1,15 @@
+{% include 'header.html' %}
+
+<h1>Please login</h1><br>
+<form action="/login" method="POST">
+    Email<input type="text" name="email"><br>
+    Password<input type="password" name="password"><br>
+    <input type="submit" value="Login"><br>
+    {% if error==True %}
+    <p> {{ msg }} <p>
+    {% endif%}
+    <a href="signIn">Sign in</a>
+</form>
+
+
+{% include 'footer.html' %}
