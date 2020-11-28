@@ -33,9 +33,9 @@ create table Instance (
 );
 
 create table Tuple (
-    InstanceId integer,
+    TupleId integer,
     Project integer,
-    primary key (InstanceId, Project),
+    primary key (TupleId, Project),
     foreign key (Project) references Instance(Project) on update cascade on delete cascade
 );
 
@@ -45,19 +45,19 @@ create table InstanceTuple (
     Project integer,
     primary key (Instance, Tuple, Project),
     foreign key (Instance, Project) references Instance(InstanceId, Project) on update cascade on delete cascade,
-    foreign key (Tuple, Project) references Tuple(InstanceId, Project) on update cascade on delete cascade
+    foreign key (Tuple, Project) references Tuple(TupleId, Project) on update cascade on delete cascade
 );
 
 create table Annotation (
-    InstanceId integer AUTO_INCREMENT,
+    AnnotationId integer AUTO_INCREMENT,
     Best integer,
     Worst integer,
     Tuple integer,
     Annotator varchar(35),
     Project integer,
-    primary key (InstanceId),
+    primary key (AnnotationId),
     foreign key (Annotator) references _User(Email) on update cascade on delete cascade,
-    foreign key (Tuple, Project) references Tuple(InstanceId, Project) on update cascade on delete cascade,
+    foreign key (Tuple, Project) references Tuple(TupleId, Project) on update cascade on delete cascade,
     foreign key (Best, Project) references Instance(InstanceId, Project) on update cascade on delete cascade,
     foreign key (Worst, Project) references Instance(InstanceId, Project) on update cascade on delete cascade
 );
