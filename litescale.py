@@ -160,7 +160,7 @@ def get_project(project_id):
                        'ReplicateInstances',
                        'ProjectOwner',
                        ProjectId=project_id)
-
+    
     project_dict = {
         "project_name": result[0][0],
         "phenomenon": result[0][1],
