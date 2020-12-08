@@ -1,8 +1,16 @@
 {% include 'header.html' %}
 
-<h1>Home</h1><br>
-<a href="logout">Log out</a>
+<h1>Welcome, {{user}}</h1><br>
 
+<ul>
+<li><a href="/{{user}}/start">Start/continue</a></li>
+<li><a href="/{{user}}/gold">Generate gold standard</a></li>
+<li><a href="/{{user}}/new">Create new project</a></li>
+<li><a href="/{{user}}/delete">Delete project</a></li>
+<li><a href="/{{user}}/authorization">Get authorization</a></li>
 
+<ul>
+
+<br><a href="logout">Log out</a>
 
 {% include 'footer.html' %}

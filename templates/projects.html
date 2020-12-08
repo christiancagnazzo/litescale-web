@@ -1,0 +1,25 @@
+{% include 'header.html' %}
+
+{% if action == 'start': %}
+<h1>Start/continue project</h1>
+{% else: %}
+<h1>Generate gold standard</h1>
+{% endif %}
+
+ <table>
+    <caption>Projects</caption>
+    <tr>
+        <th>Name</th>
+        <th>Owner</th>
+    </tr>
+    
+    {%for project in project_list:%}
+    <tr>
+        <td><a href="/{{action}}/{{project[0]}}">{{project[1]}}</a></td>
+        <td>{{project[2]}}</td>
+    <th>    
+    {% endfor %}
+</table>
+<hr>
+<a href="/{{user}}/home">back</a>
+{% include 'footer.html' %}

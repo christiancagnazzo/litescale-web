@@ -129,7 +129,7 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
                            ReplicateInstances=replication,
                            ProjectOwner=user)
     if (not isinstance(project_id, int)):
-        return ERROR, "Project not create: " + result.msg
+        return ERROR, "Project not create: " + project_id.msg
 
     # Owner authorization
     get_authorization(project_id, user)
