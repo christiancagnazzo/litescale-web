@@ -3,24 +3,14 @@ from db import *
 from os import mkdir
 from os.path import join, isdir
 
-PROJECT_ROOT = 'projects/'
 ERROR = 0
 NOT_ERROR = 1
 INSERT = 0
 INSERT_IGNORE = 1
+GOLD_ROOT = 'static/'
 
 
-def project_dir(project_id):
-    return join(PROJECT_ROOT, str(project_id))
-    # Return path to the project directory
-
-
-def gold_file(project_id):
-    return join(project_dir(project_id), "gold.tsv")
-    # Return path to the gold file
-
-
-def project_list(user):
+def all_project_list(user):
     db = Dbconnect()
     query = "SELECT P.ProjectId, P.ProjectName, P.ProjectOwner \
             FROM Project P JOIN Authorization A ON P.ProjectId=A.Project \
@@ -29,6 +19,14 @@ def project_list(user):
     db.close()
     return project_list
     # Returns the list of projects which the user is authorized to access
+    
+def own_project_list(user):
+    db = Dbconnect()
+    condition = "ProjectOwner = %s"
+    project_list = db.select('Project', condition, 'ProjectId', 'ProjectName', 'ProjectOwner', ProjectOwner=user)
+    db.close()
+    return project_list
+    # Returns the list of projects which the user is owner
 
 
 def insert_user(user, password):
@@ -70,10 +68,10 @@ def delete_project(project_id):
     condition = 'ProjectId = %s'
     result = db.delete('Project', condition, project_id)
     db.close()
-    if (isinstance(result, int)):
+    if (isinstance(result, int) and result):
         return NOT_ERROR, "Project deleted correctly"
     else:
-        return ERROR, "Projct not deleted: " + result.msg
+        return ERROR, "Project does not exist"
     # Delete project
 
 
@@ -287,7 +285,7 @@ def annotate(project_id, user, tup_id, answer_best, answer_worst):
     # Insert annotation into the db
 
 
-def gold(project_id):
+def generate_gold(project_id):
     if (empty_annotations(project_id)):
         return ERROR, "Empty annotations. Start to annotate"
 
@@ -332,12 +330,11 @@ def gold(project_id):
     scores_normalized = {id: (s-min_score)/(max_score-min_score)
                          for id, s in scores.items()}
 
-    if not isdir(PROJECT_ROOT):
-        mkdir(PROJECT_ROOT)
-    if not isdir(project_dir(project_id)):
-        mkdir(project_dir(project_id))
 
-    with open(gold_file(project_id), "w") as fo:
+    if not isdir(GOLD_ROOT):
+        mkdir(GOLD_ROOT)
+
+    with open(join(GOLD_ROOT,"gold.tsv"), "w") as fo:    
         for id in ids:
             fo.write("{0}\t{1}\t{2}\n".format(
                 id, texts[id], scores_normalized[id]))

@@ -2,8 +2,12 @@
 
 {% if action == 'start': %}
 <h1>Start/continue project</h1>
-{% else: %}
+{% elif action == 'gold': %}
 <h1>Generate gold standard</h1>
+{% elif action == 'delete': %}
+<h1>Delete project</h1>
+{% elif action == 'authorization': %}
+<h1>Get authorization</h1>
 {% endif %}
 
  <table>
@@ -15,11 +19,14 @@
     
     {%for project in project_list:%}
     <tr>
-        <td><a href="/{{action}}/{{project[0]}}">{{project[1]}}</a></td>
+        <td><a href="{{action}}?id={{project[0]}}">{{project[1]}}</a></td>
         <td>{{project[2]}}</td>
     <th>    
     {% endfor %}
 </table>
+{% if error==True %}
+    <p> {{ msg }} <p>
+{% endif%}
 <hr>
 <a href="/{{user}}/home">back</a>
 {% include 'footer.html' %}
