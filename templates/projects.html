@@ -6,8 +6,6 @@
 <h1>Generate gold standard</h1>
 {% elif action == 'delete': %}
 <h1>Delete project</h1>
-{% elif action == 'authorization': %}
-<h1>Get authorization</h1>
 {% endif %}
 
  <table>
@@ -24,7 +22,7 @@
     <th>    
     {% endfor %}
 </table>
-{% if error==True %}
+{% if rep==True %}
     <p> {{ msg }} <p>
 {% endif%}
 <hr>

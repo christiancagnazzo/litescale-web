@@ -4,10 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # TO-DO
 # security password
-# handle entered text file error
-# authorization project
+# file input error ?
+# check authorization project
 # session
-# confirm delete account
+# confirm delete account and project
+# id project visible request get!  
 
 # User default
 # email: root - password: 1234
@@ -127,7 +128,7 @@ def new(user):
             phenomenon = details['phenomenon']
             tuple_size = eval(details['tuple_size'])
             replication = eval(details['replication'])
-            request.files.get('instance_file').save('/tmp.tsv')
+            request.files.get('instance_file').save('tmp.tsv')
             # new project
             if (project_name and phenomenon and request.files.get('instance_file')):
                 rst, msg = new_project(
@@ -144,14 +145,14 @@ def new(user):
                     pass
 
                 if (not rst):  # project not created (db error)
-                    return render_template('new.html', error=True, msg=msg)
+                    return render_template('new.html',  user=user, rep=True, msg=msg)
 
                 else:
-                    # -> redirect to HOME MENU'
-                    return redirect(url_for('home', user=user))
-
+                    # -> PROJECT CREATED
+                    return render_template('new.html',  user=user, rep=True, msg=msg)
+                
             else:  # empty fileds
-                return render_template('new.html', error=True, msg='Complete all fields')
+                return render_template('new.html',  user=user, rep=True, msg='Complete all fields')
         # GET
         return render_template('new.html', user=user)
     else:
@@ -186,7 +187,7 @@ def start(user):
             project_dict = get_project(id)
 
             if tup is None:  # no tuple
-                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), error=True, msg='No tuple to annotate')
+                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg='No tuple to annotate')
 
             # tuple
             done, total = progress(id, user)
@@ -217,7 +218,7 @@ def gold(user):
             if (rst):
                 return redirect(url_for('static', filename='gold.tsv'))
             else:
-                return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user), error=True, msg=msg)
+                return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user), rep=True, msg=msg)
 
         return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user))
     else:
@@ -239,10 +240,10 @@ def delete(user):
             rst, msg = delete_project(id)
 
             if (not rst):  # error db
-                return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), error=True, msg=msg)
+                return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg=msg)
 
-            # -> redirect to HOME MENU
-            return redirect(url_for('home', user=user))
+            # -> PROJECT DELETED
+            return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg=msg)
 
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user))
@@ -255,10 +256,29 @@ def delete(user):
 # ------------------------------------ GET AUTHORIZATION PROJECT ------------------------------------- #
 
 
-@app.route('/<user>/authorization')
+@app.route('/<user>/authorization', methods=['GET', 'POST'])
 def authorization(user):
     if session.get('user'):
-        return render_template('projects.html', user=user, action='authorization', project_list=own_project_list(user))
+        
+        # POST
+        if request.method == "POST":
+            details = request.form
+            project_id = details['id']
+            user_to = details['user'] 
+            
+            if (not project_id or not user_to): # empty fields
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg="Complete all fields", project_list=own_project_list(user))
+            
+            rst, msg = check_authorization(project_id,user)
+            if (not rst): # user not authorized
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))
+            
+            rst, msg = get_authorization(project_id, user_to)  
+            return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))  
+               
+        
+        # GET
+        return render_template('authorization.html', user=user, action='authorization', project_list=own_project_list(user))
     else:
         return redirect('/')
 

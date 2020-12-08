@@ -1,0 +1,31 @@
+{% include 'header.html' %}
+
+<h1>Get authorization</h1>
+
+<form name="authorization" action="" method="post">
+    User to authorize<input id="user" name="user"/><br>
+    Project Id<input id="id" name="id"/><br>
+    <input type="submit" value="Authorizes"><br><br>
+<form>
+
+ <table>
+    <caption>Projects</caption>
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+    </tr>
+    
+    {%for project in project_list:%}
+    <tr>
+        <td>{{project[0]}}</td>
+        <td>{{project[1]}}</td>
+    <th>    
+    {% endfor %}
+</table>
+
+{% if rep==True %}
+    <p> {{ msg }} <p>
+{% endif%}
+<hr>
+<a href="/{{user}}/home">back</a>
+{% include 'footer.html' %}

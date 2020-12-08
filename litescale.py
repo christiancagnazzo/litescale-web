@@ -36,7 +36,7 @@ def insert_user(user, password):
     if (isinstance(result, int)):
         return NOT_ERROR, "User entered correctly"
     else:
-        return ERROR, "User not entered: " + result.msg
+        return ERROR, "User not entered"
     # Insert a new user into the database
 
 
@@ -59,7 +59,7 @@ def delete_user(user):
     if (isinstance(result, int)):
         return NOT_ERROR, "User deleted correctly"
     else:
-        return ERROR, "User not deleted: " + result.msg
+        return ERROR, "User not deleted"
     # Delete user
 
 
@@ -81,7 +81,7 @@ def get_authorization(project_id, user):
     if (isinstance(result, int)):
         return NOT_ERROR, "Authorization given correctly"
     else:
-        return ERROR, "Authorization not given correctly: " + result.msg
+        return ERROR, "Authorization not given correctly"
     # Get authorization
 
 

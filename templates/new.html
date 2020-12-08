@@ -34,8 +34,8 @@
 <input type="file" name="instance_file" /><br><br>
 <input type="submit" value="create project"/>
 </form>
-{% if error==True %}
-    <p> {{ msg }} <p>
+{% if rep==True %}
+    <p id="msg"> {{ msg }} <p>
 {% endif%}
 <a href="/{{user}}/home">back</a>
 {% include 'footer.html' %}
