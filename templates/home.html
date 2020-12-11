@@ -1,5 +1,13 @@
 {% include 'header.html' %}
 
+<script>
+function delete_account(project_id){
+    if (confirm("Are you sure you want to delete the account?")) {
+        window.location.href = "delete_account";
+    }
+}
+</script>
+
 <h1>Welcome, {{user}}</h1><br>
 
 <ul>
@@ -8,9 +16,9 @@
 <li><a href="/{{user}}/new">Create new project</a></li>
 <li><a href="/{{user}}/delete">Delete project</a></li>
 <li><a href="/{{user}}/authorization">Get authorization</a></li>
-<li><a href="delete_account">Delete account</a></li>
-
+<li><p onclick="delete_account()">Delete account</p></li>
 <ul>
+
 
 <br><a href="logout">Log out</a>
 

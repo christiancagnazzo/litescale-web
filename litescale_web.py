@@ -19,7 +19,6 @@ app.secret_key = 'litescale'
 
 @app.route('/')
 def main():
-    session['user'] = None
     return redirect('login')
 
 

@@ -2,10 +2,21 @@
 
 <script>
 function post_request(project_id){
-    document.getElementById('project_id').value=project_id;
-    document.getElementById('request_project').submit();
+    var del = document.getElementsByClassName('delete')
+    if (del.length > 0){
+        if (confirm("Are you sure you want to delete the project?")) {
+            document.getElementById('project_id').value=project_id;
+            document.getElementById('request_project').submit();
+        }
+    }
+    else {
+        document.getElementById('project_id').value=project_id;
+        document.getElementById('request_project').submit();
+    }
 }
 </script>
+
+
 
 {% if action == 'start': %}
 <h1>Start/continue project</h1>
@@ -24,7 +35,7 @@ function post_request(project_id){
     
     {%for project in project_list:%}
     <tr>
-        <td><p onclick="post_request('{{project[0]}}')">{{project[1]}}</p></td>
+        <td><p class="{{action}}" onclick="post_request('{{project[0]}}')">{{project[1]}}</p></td>
         <td>{{project[2]}}</td>
     <th>    
     {% endfor %}
