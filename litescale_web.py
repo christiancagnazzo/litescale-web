@@ -6,7 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # security password
 # file input error ?
 # check authorization every
-# session
 # confirm delete account and project 
 
 # User default
@@ -102,7 +101,7 @@ def signUp():
 
 @app.route('/<user>/home')
 def home(user):
-    if session.get('user'):
+    if session.get('user') == user:
         return render_template('home.html', user=user)
     else:
         return redirect('/')
@@ -115,7 +114,7 @@ def home(user):
 
 @app.route('/<user>/new', methods=['GET', 'POST'])
 def new(user):
-    if session.get('user'):
+    if session.get('user') == user:
         # POST (new project)
         if request.method == 'POST':
             try:
@@ -165,7 +164,7 @@ def new(user):
 
 @app.route('/<user>/start', methods=['GET','POST'])
 def start(user):
-    if session.get('user'):
+    if session.get('user') == user:
         
         # POST -> save annotation into db
         if request.method=='POST' and 'tup_id' in request.form:
@@ -211,7 +210,7 @@ def start(user):
 
 @app.route('/<user>/gold', methods=['GET','POST'])
 def gold(user):
-    if session.get('user'):
+    if session.get('user') == user:
 
         # POST 
         if request.method=='POST':
@@ -238,7 +237,7 @@ def gold(user):
 
 @app.route('/<user>/delete', methods=['GET', 'POST'])
 def delete(user):
-    if session.get('user'):
+    if session.get('user') == user:
 
         # POST 
         if request.method=='POST':
@@ -266,7 +265,7 @@ def delete(user):
 
 @app.route('/<user>/authorization', methods=['GET', 'POST'])
 def authorization(user):
-    if session.get('user'):
+    if session.get('user') == user:
         
         # POST
         if request.method == 'POST':
@@ -297,7 +296,7 @@ def authorization(user):
 
 @app.route('/<user>/delete_account')
 def delete_account(user):
-    if session.get('user'):
+    if session.get('user') == user:
         # delete account
         delete_user(user)
         return redirect('/')
