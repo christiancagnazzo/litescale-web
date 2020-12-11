@@ -1,5 +1,13 @@
 {% include 'header.html' %}
 
+
+<script>
+function post_request(project_id){
+    document.getElementById('project_id').value=project_id;
+    document.getElementById('request_project').submit();
+}
+</script>
+
 {% if action == 'start': %}
 <h1>Start/continue project</h1>
 {% elif action == 'gold': %}
@@ -17,10 +25,15 @@
     
     {%for project in project_list:%}
     <tr>
-        <td><a href="{{action}}?id={{project[0]}}">{{project[1]}}</a></td>
+        <td><p onclick="post_request('{{project[0]}}')">{{project[1]}}</p></td>
         <td>{{project[2]}}</td>
     <th>    
     {% endfor %}
+
+    <form id="request_project" method="post" action="">
+        <input id="project_id" name="project_id" type="hidden" value="">
+    </form>
+
 </table>
 {% if rep==True %}
     <p> {{ msg }} <p>

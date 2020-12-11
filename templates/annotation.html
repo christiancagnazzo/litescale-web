@@ -19,12 +19,13 @@ function annotate(id) {
 </p>
 
 <div id="instances">
-    <form id="instance" name="instance" action="/{{user}}/start?id={{project_id}}" method="post">
+    <form id="instance" name="instance" action="" method="post">
     
     {%for instance in tup: %}
         <input class="instance" id="instance_{{instance["id"]}}" type="button" onclick="annotate('{{instance["id"]}}')" value="{{instance["text"]}}"/>
     {% endfor %} 
 
+        <input id="project_id" name="project_id" type="hidden" value="{{project_id}}">
         <input id="tup_id" name="tup_id" type="hidden" value="{{tup_id}}" />
         <input id="best" name="best" type="hidden" value="" />
         <input id="worst" name="worst" type="hidden" value="" />

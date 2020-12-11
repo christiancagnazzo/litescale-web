@@ -164,14 +164,14 @@ def new(user):
 # ------------------------------ START/CONTINUE ANNOTATION ------------------------------------------- #
 
 
-@app.route('/<user>/start', methods=['GET', 'POST'])
+@app.route('/<user>/start', methods=['GET','POST'])
 def start(user):
     if session.get('user'):
-
-        id = request.args.get('id')
-
+        
         # POST -> save annotation into db
-        if request.method == 'POST':
+        if request.method=='POST' and 'tup_id' in request.form:
+            id = request.form['project_id']
+            
             # save annotation
             details = request.form
             tup_id = details['tup_id']
@@ -180,9 +180,12 @@ def start(user):
 
             # annotate into the db
             annotate(id, user, tup_id, answer_best, answer_worst)
-
-        # GET -> annoatate
-        if (id):  # annotation
+    
+        
+        # POST -> start annotation
+        if request.method=='POST':
+            id = request.form['project_id']
+            
             tup_id, tup = next_tuple(id, user)
             project_dict = get_project(id)
 
@@ -195,7 +198,8 @@ def start(user):
                 done, total, 100.0*(done/total))
             return render_template('annotation.html', project_id=id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tup_id, tup=tup, progress=progress_string)
 
-        # project list
+        
+        # GET -> project list
         return render_template('projects.html', user=user, action='start', project_list=all_project_list(user))
     else:
         return redirect('/')
@@ -206,12 +210,14 @@ def start(user):
 # ----------------------------------- GENERATE GOLD FILE --------------------------------------------- #
 
 
-@app.route('/<user>/gold')
+@app.route('/<user>/gold', methods=['GET','POST'])
 def gold(user):
     if session.get('user'):
 
-        id = request.args.get('id')
-        if (id):
+        # POST 
+        if request.method=='POST':
+            id = request.form['project_id']
+        
             # generate gold
             rst, msg = generate_gold(id)
 
@@ -220,6 +226,7 @@ def gold(user):
             else:
                 return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user), rep=True, msg=msg)
 
+        # GET
         return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user))
     else:
         return redirect('/')
@@ -230,12 +237,14 @@ def gold(user):
 # ------------------------------------ DELETE PROJECT ------------------------------------------------ #
 
 
-@app.route('/<user>/delete')
+@app.route('/<user>/delete', methods=['GET', 'POST'])
 def delete(user):
     if session.get('user'):
 
-        id = request.args.get('id')
-        if (id):
+        # POST 
+        if request.method=='POST':
+            id = request.form['project_id']
+            
             # delete project
             rst, msg = delete_project(id)
 
@@ -261,13 +270,13 @@ def authorization(user):
     if session.get('user'):
         
         # POST
-        if request.method == "POST":
+        if request.method == 'POST':
             details = request.form
             project_id = details['id']
             user_to = details['user'] 
             
             if (not project_id or not user_to): # empty fields
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg="Complete all fields", project_list=own_project_list(user))
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=own_project_list(user))
             
             rst, msg = check_authorization(project_id,user)
             if (not rst): # user not authorized
