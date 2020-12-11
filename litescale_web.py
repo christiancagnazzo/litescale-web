@@ -5,10 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # TO-DO
 # security password
 # file input error ?
-# check authorization project
+# check authorization every
 # session
-# confirm delete account and project
-# id project visible request get!  
+# confirm delete account and project 
 
 # User default
 # email: root - password: 1234
@@ -272,15 +271,15 @@ def authorization(user):
         # POST
         if request.method == 'POST':
             details = request.form
-            project_id = details['id']
+            project_id = details['project_id']
             user_to = details['user'] 
             
             if (not project_id or not user_to): # empty fields
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=own_project_list(user))
             
-            rst, msg = check_authorization(project_id,user)
+            """rst, msg = check_authorization(project_id,user)
             if (not rst): # user not authorized
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))"""
             
             rst, msg = get_authorization(project_id, user_to)  
             return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))  

@@ -1,24 +1,30 @@
 {% include 'header.html' %}
 
+<script>
+function post_request(project_id){
+    document.getElementById('project_id').value=project_id;
+    document.getElementById('authorization').submit();
+}
+</script>
+
 <h1>Get authorization</h1>
 
-<form name="authorization" action="" method="post">
-    User to authorize<input id="user" name="user"/><br>
-    Project Id<input id="id" name="id"/><br>
-    <input type="submit" value="Authorizes"><br><br>
+<form id="authorization" name="authorization" action="" method="post">
+    User to authorize <input id="user" name="user"/>
+    <input id="project_id" name="project_id" type="hidden" value=""><br><br>
 <form>
 
  <table>
     <caption>Projects</caption>
     <tr>
-        <th>Id</th>
         <th>Name</th>
+        <th>Owner</th>
     </tr>
     
     {%for project in project_list:%}
     <tr>
-        <td>{{project[0]}}</td>
-        <td>{{project[1]}}</td>
+        <td><p onclick="post_request('{{project[0]}}')">{{project[1]}}</p></td>
+        <td>{{project[2]}}</td>
     <th>    
     {% endfor %}
 </table>
