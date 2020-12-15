@@ -45,6 +45,10 @@
   padding-bottom: 39px;
 }
 
+.signup {
+  background-color: #ff4d4d;
+}
+
 /*==================================================================
 
 /* [ Input ] */
@@ -97,6 +101,10 @@
   color: #fff;
   line-height: 1.2;
   text-transform: uppercase;
+}
+
+.signupbtn {
+  background-color: #ff4d4d;
 }
   
 

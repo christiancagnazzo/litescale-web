@@ -1,11 +1,5 @@
 {% include 'header.html' %}
 
-
-<!-- <div class="flex-col-l">
-INTRODUCTION
-</div>
--->
-
 <div class="flex-col-c logincontainer">
     <div class="wraplogin">
         <form class="loginform p-l-55 p-r-55 p-t-178" action="/login" method="POST">
@@ -19,7 +13,7 @@ INTRODUCTION
             <div class="containerloginbtn">
                 <button type="submit" class="loginbtn">Sign in</button>
             </div>
-            <div class="error p-t-40 .text-center pos-relative">
+            <div class="error p-t-40 text-center pos-relative">
             {% if error==True %}
                 <span> {{ msg }} </span>
             {% endif%}

@@ -3,7 +3,6 @@ from litescale import *
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # TO-DO
-# security password
 # file input error ?
 # check authorization every
 

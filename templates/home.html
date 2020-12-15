@@ -1,5 +1,33 @@
 {% include 'header.html' %}
 
+<div class="welcome">
+<span>Welcome, {{user}}</span>
+<a id="logout" href="logout">Log out</a>
+</div>
+<hr>
+<div class="home">
+    <div class="section">
+        <div class="container bgblue">
+            <span><a href="/{{user}}/start">Start or continue to annotate yours projects</a><span>
+        </div>
+        <div class="container bggreen">
+            <span><a href="/{{user}}/gold">Generate the gold standard file of a project</a><span>
+        </div>
+        <div class="container bgred">
+            <span><a href="/{{user}}/new">Create a new project</a><span>
+        </div>
+        <div class="container bgblue">
+            <span><a href="/{{user}}/authorization">Give permission for your project to another user</a><span>
+        </div>
+        <div class="container bggreen">
+            <span><a href="/{{user}}/delete">Delete a your project (All annotations made will be deleted)</a><span>
+        </div>
+        <div class="container bgred">
+            <span><a href="" onclick="delete_account()">Delete your account</a><span>
+        </div>
+    </div>
+</div>
+
 <script>
 function delete_account(project_id){
     if (confirm("Are you sure you want to delete the account?")) {
@@ -7,19 +35,5 @@ function delete_account(project_id){
     }
 }
 </script>
-
-<h1>Welcome, {{user}}</h1><br>
-
-<ul>
-<li><a href="/{{user}}/start">Start/continue</a></li>
-<li><a href="/{{user}}/gold">Generate gold standard</a></li>
-<li><a href="/{{user}}/new">Create new project</a></li>
-<li><a href="/{{user}}/delete">Delete project</a></li>
-<li><a href="/{{user}}/authorization">Get authorization</a></li>
-<li><p onclick="delete_account()"><u>Delete account<u></p></li>
-<ul>
-
-
-<br><a href="logout">Log out</a>
 
 {% include 'footer.html' %}

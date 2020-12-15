@@ -2320,6 +2320,12 @@
 */
 .bgwhite {background-color: white;}
 .bgblack {background-color: black;}
+.bgred {background-color: #ff4d4d;}
+.bgblue {background-color: #4d94ff;}
+.bgorange {background-color: #ffb84d;}
+.bgyellow {background-color: #ffff4d;}
+.bgpurple {background-color: #ff66ff;}
+.bggreen {background-color: #57b846;}
 
 
 
