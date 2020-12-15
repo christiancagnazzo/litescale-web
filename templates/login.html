@@ -1,15 +1,36 @@
 {% include 'header.html' %}
 
-<h1>Please login</h1><br>
-<form action="/login" method="POST">
-    Email<input type="text" name="email"><br>
-    Password<input type="password" name="password"><br>
-    <input type="submit" value="Login"><br>
-    {% if error==True %}
-    <p> {{ msg }} <p>
-    {% endif%}
-    <a href="signUp">Sign Up</a>
-</form>
+
+<!-- <div class="flex-col-l">
+INTRODUCTION
+</div>
+-->
+
+<div class="flex-col-c logincontainer">
+    <div class="wraplogin">
+        <form class="loginform p-l-55 p-r-55 p-t-178" action="/login" method="POST">
+            <span class="loginformtitle">Welcome to litescale!</span>
+            <div class="wrapinput m-b-16">
+                <input class="input" type="text" name="email" placeholder="Email">
+            </div>
+            <div class="wrapinput">
+                <input class="input" type="password" name="password" placeholder="Password">
+            </div>
+            <div class="containerloginbtn">
+                <button type="submit" class="loginbtn">Sign in</button>
+            </div>
+            <div class="error p-t-40 .text-center pos-relative">
+            {% if error==True %}
+                <span> {{ msg }} </span>
+            {% endif%}
+            </div>
+            <div class="flex-col-c p-t-100 0 p-b-40">
+                <span class="txt1 p-b-9">Don’t have an account?</span>
+                <a href="signUp" class="txt3">Sign up now</a>
+            </div>
+        </form>
+    </div>
+</div>
 
 
 {% include 'footer.html' %}

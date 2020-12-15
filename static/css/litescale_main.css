@@ -1,0 +1,73 @@
+* {
+    margin: 0px; 
+    padding: 0px; 
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: sans-serif;
+}
+
+
+h1,h2,h3,h4,h5,h6 {
+    margin: 0px;
+}
+
+p {
+    font-family: sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #666666;
+    margin: 0px;
+}
+
+ul, li {
+    margin: 0px;
+}
+
+.error {
+  color: red;
+}
+
+/*---------------------------------------------*/
+
+input {
+    outline: none;
+    border: none;
+}
+
+/*---------------------------------------------*/
+button {
+    outline: none;
+    border: none;
+    background: transparent;
+}
+
+
+/*==================================================================*/
+
+
+/* [ Utility ]*/
+.txt1 {
+  font-family: Ubuntu-Regular;
+  font-size: 15px;
+  color: #999999;
+  line-height: 1.4;
+}
+
+.txt2 {
+  font-family: Ubuntu-Regular;
+  font-size: 15px;
+  color: #57b846;
+  line-height: 1.4;
+}
+
+.txt3 {
+  font-family: Ubuntu-Bold;
+  font-size: 15px;
+  color: #57b846;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+/*==================================================================*/

@@ -6,7 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # security password
 # file input error ?
 # check authorization every
-# confirm delete account and project 
 
 # User default
 # email: root - password: 1234
