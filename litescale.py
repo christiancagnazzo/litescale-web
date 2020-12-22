@@ -1,7 +1,6 @@
 from math import floor, gcd
 from db import *
-from os import mkdir
-from os.path import join, isdir
+
 
 ERROR = 0
 NOT_ERROR = 1
@@ -171,6 +170,9 @@ def get_project(project_id):
                        'ReplicateInstances',
                        'ProjectOwner',
                        ProjectId=project_id)
+    
+    if result == []:
+        return ERROR, "Project not found"
 
     project_dict = {
         "project_name": result[0][0],
@@ -206,7 +208,7 @@ def get_project(project_id):
 
     db.close()
     project_dict["tuples"] = tuples
-    return project_dict
+    return NOT_ERROR, project_dict
     # Get project dictionary
 
 
@@ -227,7 +229,10 @@ def get_annotations(project_id, user):
 
 
 def next_tuple(project_id, user):
-    project_dict = get_project(project_id)
+    rst, project_dict = get_project(project_id)
+    
+    if not rst:
+        return None, None
 
     annotations = get_annotations(project_id, user)
 
@@ -240,7 +245,7 @@ def next_tuple(project_id, user):
 
 
 def progress(project_id, user):
-    project_dict = get_project(project_id)
+    rst, project_dict = get_project(project_id)
     annotations = get_annotations(project_id, user)
     return len(annotations), len(project_dict["tuples"])
     # Progress of annotations
@@ -289,7 +294,11 @@ def generate_gold(project_id):
     if (empty_annotations(project_id)):
         return ERROR, "Empty annotations. Start to annotate"
 
-    project_dict = get_project(project_id)
+    rst, project_dict = get_project(project_id)
+    
+    if not rst:
+        return ERROR, None
+    
     ids = set()
     texts = dict()
     for tup_id, tup in project_dict["tuples"].items():
@@ -331,12 +340,10 @@ def generate_gold(project_id):
                          for id, s in scores.items()}
 
 
-    if not isdir(GOLD_ROOT):
-        mkdir(GOLD_ROOT)
 
-    with open(join(GOLD_ROOT,"gold.tsv"), "w") as fo:    
-        for id in ids:
-            fo.write("{0}\t{1}\t{2}\n".format(
-                id, texts[id], scores_normalized[id]))
+    result = ""
+    for id in ids:
+        result += "{0}\t{1}\t{2}\n".format(
+            id, texts[id], scores_normalized[id])
 
-    return NOT_ERROR, "Gold standard generate correctly!"
+    return NOT_ERROR, result

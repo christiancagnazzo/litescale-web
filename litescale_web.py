@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from litescale import *
+import json
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # TO-DO
@@ -25,6 +27,22 @@ def main():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    
+    #################   TEST  ##################################
+    
+    query = {'email':'root'}
+    response = requests.get('http://localhost:5000/litescale/api/users', params=query)
+    response = response.json()
+    
+    query = {'email':'root', 'project_id': 27}
+    response = requests.get('http://localhost:5000/litescale/api/gold', json=query)
+    file = open("ProvaGold", 'wb')
+    file.write(response.content)
+    file.close
+
+    #########################################################
+    
+    
     # POST
     if (request.method == 'POST'):
         details = request.form
@@ -182,7 +200,7 @@ def start(user):
             id = request.form['project_id']
             
             tup_id, tup = next_tuple(id, user)
-            project_dict = get_project(id)
+            rst, project_dict = get_project(id)
 
             if tup is None:  # no tuple
                 return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg='No tuple to annotate')
@@ -304,4 +322,4 @@ def delete_account(user):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5002)

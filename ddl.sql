@@ -59,7 +59,8 @@ create table Annotation (
     foreign key (Annotator) references _User(Email) on update cascade on delete cascade,
     foreign key (Tuple, Project) references Tuple(TupleId, Project) on update cascade on delete cascade,
     foreign key (Best, Project) references Instance(InstanceId, Project) on update cascade on delete cascade,
-    foreign key (Worst, Project) references Instance(InstanceId, Project) on update cascade on delete cascade
+    foreign key (Worst, Project) references Instance(InstanceId, Project) on update cascade on delete cascade,
+    unique (Tuple, Annotator, Project)
 );
 
 
