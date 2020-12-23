@@ -59,8 +59,8 @@ class LoginAPI(Resource):
         if not check_password_hash(user[0][1], password):  # check password
             abort(401, description="Incorrect email or password")
         
-        ret = {'AccessToken': create_access_token(identity=email)}
-        return jsonify(ret) # token
+        token = {'AccessToken': create_access_token(identity=email)}
+        return jsonify(token) 
         
 # ---------------------------------------------------------------------------------------------------- #
     
@@ -89,13 +89,13 @@ class UsersAPI(Resource):
             # existing user
             abort(409, description="User already exists")
         
-        return jsonify({ 'email': email, 'Location': url_for('users', email=email,_external = True)})
+        token = {'AccessToken': create_access_token(identity=email)}
+        return jsonify(token) 
     
-    # Delete user 
+    # Delete user
     @jwt_required 
-    @use_args({"email": fields.Str(required=True)}, location="query")
-    def delete(self, args): 
-        email = args['email']
+    def delete(self): 
+        email = get_jwt_identity()
         
         rst, msg = delete_user(email)
     
@@ -113,27 +113,18 @@ class ProjectListAPI(Resource):
     def __init__(self):
         super(ProjectListAPI, self).__init__() 
    
-    user_args = {
-        "email": fields.Str(required=True),
-        "accessType": fields.Str(required=True) # authorized or owner
-    }     
-       
+         
     # Return project list 
     @jwt_required
-    @use_args(user_args, location="json") 
+    @use_args({"type": fields.Str(required=True)}, location="query") # authorized or owner
     def get(self, args): 
-        email = args['email']
-        accessType = args['accessType']
+        email = get_jwt_identity()
+        typeList = args['typeList']
         
-        if (accessType != AUTHORIZED and accessType != OWNER):
+        if (typeList != AUTHORIZED and typeList != OWNER):
             abort(400, description="Indicate type of list: owner or authorized")
             
-        rst, msg = search_user(args['email']);
-        
-        if not rst:
-            abort(404, "User not found")
-    
-        if accessType == AUTHORIZED:
+        if typeList == AUTHORIZED:
             project_list = all_project_list(email)
         else:
             project_list = own_project_list(email)
@@ -166,12 +157,18 @@ class ProjectsAPI(Resource):
     @jwt_required
     @use_args({"id": fields.Int(required=True)}, location="query")
     def get(self, args):
+        email = get_jwt_identity()
         project_id = args['id']
         
         rst, project_dict = get_project(project_id)
         
         if not rst:
             abort(404, description="Project not found")
+            
+        rst, msg = check_authorization(project_id, email)
+        
+        if not rst:
+            abort(401)
         
         return project_dict
     
@@ -179,18 +176,23 @@ class ProjectsAPI(Resource):
     @jwt_required
     @use_args({"id": fields.Int(required=True)}, location="query")
     def delete(self, args):
+        email = get_jwt_identity()
         project_id = args['id']
         
         rst, msg = delete_project(project_id) 
         
         if not rst:
             abort(404, description="Project not found")
+            
+        rst, msg = check_owner(project_id, email)
+        
+        if not rst:
+            abort(401)
         
         return {"result": "True"}
     
     
     user_args = {
-        "email": fields.Str(required=True),
         "project_name": fields.Str(required=True),
         "phenomenon": fields.Str(required=True),
         "tuple_size": fields.Int(required=True),
@@ -201,7 +203,7 @@ class ProjectsAPI(Resource):
     @jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
-        email = args['email']
+        email = get_jwt_identity()
         project_name = args['project_name']
         tuple_size = args['tuple_size']
         phenomenon = args['phenomenon']
@@ -230,18 +232,18 @@ class TuplesAPI(Resource):
     def __init__(self):
         super(TuplesAPI, self).__init__() 
         
-    user_args = {
-        "email": fields.Str(required=True),
-        "project_id": fields.Int(required=True)
-    }
-    
     # Get next tuple to annotate
     @jwt_required
-    @use_args(user_args, location="json")
+    @use_args({"project_id": fields.Int(required=True)}, location="query")
     def get(self, args):
-        email = args['email']
+        email = get_jwt_identity()
         project_id = args['project_id']
         
+        rst, msg = check_authorization(project_id, email)
+        
+        if not rst:
+            abort(401)
+            
         tup_id, tup = next_tuple(project_id, email)
         
         if tup is None:
@@ -259,7 +261,6 @@ class AnnotationsAPI(Resource):
         super(AnnotationsAPI, self).__init__() 
         
     user_args = {
-        "email": fields.Str(required=True),
         "project_id": fields.Int(required=True),
         "tup_id": fields.Int(required=True),
         "answer_best": fields.Int(required=True),
@@ -270,11 +271,16 @@ class AnnotationsAPI(Resource):
     @jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
-        email = args['email']
+        email = get_jwt_identity()
         project_id = args['project_id']
         tup_id = args['tup_id']
         answer_best = args['answer_best']
         answer_worst = args['answer_worst']
+        
+        rst, msg = check_authorization(project_id, email)
+        
+        if not rst:
+            abort(401)
         
         x, y = annotate(project_id, email, tup_id, answer_best, answer_worst)
         return jsonify({"Annotations": x, "Tuples": y})        
@@ -287,16 +293,17 @@ class GoldAPI(Resource):
     def __init__(self):
         super(GoldAPI, self).__init__() 
         
-    user_args = {
-        "email": fields.Str(required=True),
-        "project_id": fields.Int(required=True),
-    }
-    
     # Add annotation into db
     @jwt_required
-    @use_args(user_args, location="json")
+    @use_args({"project_id": fields.Int(required=True)}, location="query")
     def get(self, args):
+        email = get_jwt_identity()
         project_id = args['project_id']
+        
+        rst, msg = check_authorization(project_id, email)
+        
+        if not rst:
+            abort(401)
         
         rst, file = generate_gold(project_id)
 
@@ -315,6 +322,7 @@ api.add_resource(ProjectsAPI, '/litescale/api/projects', endpoint='project')
 api.add_resource(TuplesAPI, '/litescale/api/tuples', endpoint='tuples')
 api.add_resource(AnnotationsAPI, '/litescale/api/annotations', endpoint='annotation')
 api.add_resource(GoldAPI, '/litescale/api/gold', endpoint='gold')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

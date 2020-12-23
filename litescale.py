@@ -94,8 +94,21 @@ def check_authorization(project_id, user):
         return ERROR, "User not authorized"
     else:
         return NOT_ERROR, "User authorized"
-    # Check authorization
+    # Check project authorization
+    
+    
+def check_owner(project_id, user):
+    db = Dbconnect()
+    query = "SELECT * FROM Project P WHERE P.ProjectId = %s AND P.ProjectOwner = %s"
+    result = db.select_advanced(
+        query, ("P.ProjectId", project_id), ("P.ProjectOwner", user))
 
+    if (not result):
+        return ERROR, "User not authorized"
+    else:
+        return NOT_ERROR, "User authorized"
+    # Check project owner
+    
 
 def make_tuples(instances, k, p):
     n = len(instances)
