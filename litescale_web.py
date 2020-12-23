@@ -1,20 +1,12 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from litescale import *
+from litescale import * # to remove 
 import json
 import requests
-from werkzeug.security import generate_password_hash, check_password_hash
 
-# TO-DO
-# file input error ?
-# check authorization every
-
-# User default
-# email: root - password: 1234
+# User default: root / 1234
 
 app = Flask(__name__, static_url_path='/static')
-
-# Sessione key
-app.secret_key = 'litescale'
+app.secret_key = 'litescale'  # Session key
 
 
 @app.route('/')
@@ -36,17 +28,19 @@ def login():
         if (not user or not password):  # empty fields
             return render_template('login.html', error=True, msg='Complete all fields')
 
-        result, user = search_user(user)
-        if not result:  # user not found in the db
-            return render_template('login.html', error=True, msg=user)
+        query = {"email": user, "password": password}
+        response = requests.post(
+            "http://localhost:5000/litescale/api/login", json=query)
+        response_json = response.json()
 
-        if check_password_hash(user[0][1], password):  # check password
-            session['user'] = user[0][0]
-            # -> redirect to HOME MENU'
-            return redirect(url_for('home', user=user[0][0]))
+        if not response or response.status_code > 399:
+            return render_template('login.html', error=True, msg=response_json['message'])
 
-        else:  # incorrect password
-            return render_template('login.html', error=True, msg='Incorrect Email or Password')
+        # -> redirect to HOME MENU'
+        session['user'] = user
+        session['token'] = response_json['AccessToken']
+        return redirect(url_for('home', user=user))
+
     # GET
     else:
         return render_template('login.html')
@@ -60,6 +54,7 @@ def login():
 @app.route('/<user>/logout')
 def logout(user):
     session.pop('user', None)
+    session.pop('token', None)
     return redirect('/')
 
 # ---------------------------------------------------------------------------------------------------- #
@@ -76,20 +71,21 @@ def signUp():
         user = details['email']
         password = details['password']
 
-        if user and password:       
-            query = { "email" : details['email'],
-                    "password" : details['password'] }
-            
-            response = requests.post("http://localhost:5000/litescale/api/users", json=query)
+        if user and password:
+            query = {"email": details['email'],
+                     "password": details['password']}
+
+            response = requests.post(
+                "http://localhost:5000/litescale/api/users", json=query)
             response_json = response.json()
-             
-            if not response or response.status_code > 399: 
+
+            if not response or response.status_code > 399:
                 return render_template('registration.html', error=True, msg=response_json['message'])
-            
-            session['user'] = response_json['email']
-            # session['token'] = 
+
+            session['user'] = user
+            session['token'] = response_json['AccessToken']
             # -> redirect to HOME MENU'
-            return redirect(url_for('home', user=response_json['email']))
+            return redirect(url_for('home', user=user))
 
         else:  # empty fields
             return render_template('registration.html', error=True, msg='Complete all fields')
@@ -130,28 +126,33 @@ def new(user):
             tuple_size = eval(details['tuple_size'])
             replication = eval(details['replication'])
             request.files.get('instance_file').save('tmp.tsv')
+
             # new project
             if (project_name and phenomenon and request.files.get('instance_file')):
-                rst, msg = new_project(
-                    user,
-                    project_name,
-                    phenomenon,
-                    tuple_size,
-                    replication,
-                    'tmp.tsv'
-                )
+
+                query = {'project_name': project_name,
+                         'phenomenon': phenomenon,
+                         'tuple_size': tuple_size,
+                         'replication': replication}
+
+                headers = {'Authorization': 'Bearer {}'.format(
+                    session.get('token'))}
+                response = requests.post(
+                    'http://localhost:5000/litescale/api/projects', json=query, headers=headers)
+                response_json = response.json()
+
                 try:
                     os.remove('tmp.tsv')
                 except:
                     pass
 
-                if (not rst):  # project not created (db error)
-                    return render_template('new.html',  user=user, rep=True, msg=msg)
+                if not response or response.status_code > 399:
+                    return render_template('new.html',  user=user, rep=True, msg=response_json['message'])
 
-                else:
+                if 'result' in response_json and response_json['result'] == 'True':
                     # -> PROJECT CREATED
-                    return render_template('new.html',  user=user, rep=True, msg=msg)
-                
+                    return render_template('new.html',  user=user, rep=True, msg="Project created")
+
             else:  # empty fileds
                 return render_template('new.html',  user=user, rep=True, msg='Complete all fields')
         # GET
@@ -165,41 +166,72 @@ def new(user):
 # ------------------------------ START/CONTINUE ANNOTATION ------------------------------------------- #
 
 
-@app.route('/<user>/start', methods=['GET','POST'])
+@app.route('/<user>/start', methods=['GET', 'POST'])
 def start(user):
     if session.get('user') == user:
-        
+
         # POST -> save annotation into db
-        if request.method=='POST' and 'tup_id' in request.form:
-            id = request.form['project_id']
-            
+        if request.method == 'POST' and 'tup_id' in request.form:
+            project_id = request.form['project_id']
+
             # save annotation
             details = request.form
             tup_id = details['tup_id']
             answer_best = details['best']
             answer_worst = details['worst']
 
-            # annotate into the db
-            annotate(id, user, tup_id, answer_best, answer_worst)
-    
-        
+            # annotate
+            query = {"project_id": project_id,
+                     "tup_id": tup_id,
+                     "answer_best": answer_best,
+                     "answer_worst": answer_worst}
+            headers = {'Authorization': 'Bearer {}'.format(
+                session.get('token'))}
+
+            requests.post(
+                "http://localhost:5000/litescale/api/annotations", headers=headers, json=query)
+
         # POST -> start annotation
-        if request.method=='POST':
-            id = request.form['project_id']
-            
-            tup_id, tup = next_tuple(id, user)
-            rst, project_dict = get_project(id)
+        if request.method == 'POST':
+            project_id = request.form['project_id']
 
-            if tup is None:  # no tuple
-                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg='No tuple to annotate')
+            params = {"project_id": project_id}
+            headers = {'Authorization': 'Bearer {}'.format(
+                session.get('token'))}
 
-            # tuple
-            done, total = progress(id, user)
+            response = requests.get(
+                "http://localhost:5000/litescale/api/projects", headers=headers, params=params)
+            project_dict = response.json()
+
+            if not response or response.status_code > 399:
+                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg=response_json['message'])
+
+            response = requests.get(
+                "http://localhost:5000/litescale/api/tuples", headers=headers, params=params)
+            tuples = response.json()
+
+            if not response or response.status_code > 399:
+                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg=response_json['message'])
+
+            if 'Error' in tuples:  # no tuple
+                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg=tuples['Error'])
+
+            # progress
+            response = requests.get(
+                "http://localhost:5000/litescale/api/progress", headers=headers, params=params)
+            progress = response.json()
+
+            if not response or response.status_code > 399:
+                return render_template('projects.html', user=user, action='start', project_list=all_project_list(user), rep=True, msg=progress['message'])
+
+            done = progress['done']
+            total = progress['total']
             progress_string = 'progress: {0}/{1} {2:.1f}%'.format(
                 done, total, 100.0*(done/total))
-            return render_template('annotation.html', project_id=id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tup_id, tup=tup, progress=progress_string)
 
-        
+            # tuple
+            return render_template('annotation.html', project_id=project_id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tuples['tup_id'], tup=tuples['tup'], progress=progress_string)
+
         # GET -> project list
         return render_template('projects.html', user=user, action='start', project_list=all_project_list(user))
     else:
@@ -211,21 +243,29 @@ def start(user):
 # ----------------------------------- GENERATE GOLD FILE --------------------------------------------- #
 
 
-@app.route('/<user>/gold', methods=['GET','POST'])
+@app.route('/<user>/gold', methods=['GET', 'POST'])
 def gold(user):
     if session.get('user') == user:
 
-        # POST 
-        if request.method=='POST':
-            id = request.form['project_id']
-        
-            # generate gold
-            rst, msg = generate_gold(id)
+        # POST
+        if request.method == 'POST':
+            project_id = request.form['project_id']
 
-            if (rst):
-                return redirect(url_for('static', filename='gold.tsv'))
-            else:
-                return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user), rep=True, msg=msg)
+            params = {'project_id': project_id}
+            headers = {'Authorization': 'Bearer {}'.format(
+                session.get('token'))}
+            response = requests.get(
+                'http://localhost:5000/litescale/api/gold', params=params, headers=headers)
+
+            if not response or response.status_code > 399:
+                response = response.json()
+                return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user), rep=True, msg=response['message'])
+
+            file = open("static/gold.tsv", 'wb')
+            file.write(response.content)
+            file.close
+
+            return redirect(url_for('static', filename='gold.tsv'))
 
         # GET
         return render_template('projects.html', user=user, action='gold', project_list=all_project_list(user))
@@ -242,18 +282,23 @@ def gold(user):
 def delete(user):
     if session.get('user') == user:
 
-        # POST 
-        if request.method=='POST':
-            id = request.form['project_id']
-            
-            # delete project
-            rst, msg = delete_project(id)
+        # POST
+        if request.method == 'POST':
+            project_id = request.form['project_id']
 
-            if (not rst):  # error db
-                return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg=msg)
+            params = {"project_id": project_id}
+            headers = {'Authorization': 'Bearer {}'.format(
+                session.get('token'))}
+            response = requests.delete(
+                "http://localhost:5000/litescale/api/projects", params=params, headers=headers)
+            response_json = response.json()
+
+            if not response or response.status_code > 399:
+                return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg=response_json['message'])
 
             # -> PROJECT DELETED
-            return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg=msg)
+            if 'result' in response_json and response_json['result'] == 'True':
+                return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user), rep=True, msg="Project deleted")
 
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=own_project_list(user))
@@ -269,24 +314,23 @@ def delete(user):
 @app.route('/<user>/authorization', methods=['GET', 'POST'])
 def authorization(user):
     if session.get('user') == user:
-        
+
         # POST
         if request.method == 'POST':
             details = request.form
             project_id = details['project_id']
-            user_to = details['user'] 
-            
-            if (not project_id or not user_to): # empty fields
+            user_to = details['user']
+
+            if (not project_id or not user_to):  # empty fields
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=own_project_list(user))
-            
+
             """rst, msg = check_authorization(project_id,user)
             if (not rst): # user not authorized
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))"""
-            
-            rst, msg = get_authorization(project_id, user_to)  
-            return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))  
-               
-        
+
+            rst, msg = get_authorization(project_id, user_to)
+            return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))
+
         # GET
         return render_template('authorization.html', user=user, action='authorization', project_list=own_project_list(user))
     else:
@@ -297,11 +341,13 @@ def authorization(user):
 
 # --------------------------------------- DELETE ACCOUNT --------------------------------------------- #
 
-@app.route('/<user>/delete_account')
+@app.route('/delete_account')
 def delete_account(user):
     if session.get('user') == user:
         # delete account
-        delete_user(user)
+        headers = {'Authorization': 'Bearer {}'.format(session.get('token'))}
+        requests.delete(
+            "http://localhost:5000/litescale/api/login", headers=headers)
         return redirect('/')
     else:
         return redirect('/')

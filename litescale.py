@@ -1,12 +1,10 @@
 from math import floor, gcd
 from db import *
 
-
 ERROR = 0
 NOT_ERROR = 1
 INSERT = 0
 INSERT_IGNORE = 1
-GOLD_ROOT = 'static/'
 
 
 def all_project_list(user):
@@ -18,11 +16,13 @@ def all_project_list(user):
     db.close()
     return project_list
     # Returns the list of projects which the user is authorized to access
-    
+
+
 def own_project_list(user):
     db = Dbconnect()
     condition = "ProjectOwner = %s"
-    project_list = db.select('Project', condition, 'ProjectId', 'ProjectName', 'ProjectOwner', ProjectOwner=user)
+    project_list = db.select('Project', condition, 'ProjectId',
+                             'ProjectName', 'ProjectOwner', ProjectOwner=user)
     db.close()
     return project_list
     # Returns the list of projects which the user is owner
@@ -95,8 +95,8 @@ def check_authorization(project_id, user):
     else:
         return NOT_ERROR, "User authorized"
     # Check project authorization
-    
-    
+
+
 def check_owner(project_id, user):
     db = Dbconnect()
     query = "SELECT * FROM Project P WHERE P.ProjectId = %s AND P.ProjectOwner = %s"
@@ -108,7 +108,7 @@ def check_owner(project_id, user):
     else:
         return NOT_ERROR, "User authorized"
     # Check project owner
-    
+
 
 def make_tuples(instances, k, p):
     n = len(instances)
@@ -183,7 +183,7 @@ def get_project(project_id):
                        'ReplicateInstances',
                        'ProjectOwner',
                        ProjectId=project_id)
-    
+
     if result == []:
         return ERROR, "Project not found"
 
@@ -243,7 +243,7 @@ def get_annotations(project_id, user):
 
 def next_tuple(project_id, user):
     rst, project_dict = get_project(project_id)
-    
+
     if not rst:
         return None, None
 
@@ -259,6 +259,10 @@ def next_tuple(project_id, user):
 
 def progress(project_id, user):
     rst, project_dict = get_project(project_id)
+
+    if not rst:
+        return None, None
+
     annotations = get_annotations(project_id, user)
     return len(annotations), len(project_dict["tuples"])
     # Progress of annotations
@@ -308,10 +312,10 @@ def generate_gold(project_id):
         return ERROR, "Empty annotations. Start to annotate"
 
     rst, project_dict = get_project(project_id)
-    
+
     if not rst:
         return ERROR, None
-    
+
     ids = set()
     texts = dict()
     for tup_id, tup in project_dict["tuples"].items():
@@ -351,8 +355,6 @@ def generate_gold(project_id):
     min_score = min(list(scores.values()))
     scores_normalized = {id: (s-min_score)/(max_score-min_score)
                          for id, s in scores.items()}
-
-
 
     result = ""
     for id in ids:
