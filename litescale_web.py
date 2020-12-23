@@ -27,22 +27,6 @@ def main():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    
-    #################   TEST  ##################################
-    
-    query = {'email':'root'}
-    response = requests.get('http://localhost:5000/litescale/api/users', params=query)
-    response = response.json()
-    
-    query = {'email':'root', 'project_id': 27}
-    response = requests.get('http://localhost:5000/litescale/api/gold', json=query)
-    file = open("ProvaGold", 'wb')
-    file.write(response.content)
-    file.close
-
-    #########################################################
-    
-    
     # POST
     if (request.method == 'POST'):
         details = request.form
@@ -92,16 +76,20 @@ def signUp():
         user = details['email']
         password = details['password']
 
-        if user and password:
-            password = generate_password_hash(details['password'])
-            result, msg = insert_user(user, password)
-
-            if not result:  # existing user
-                return render_template('registration.html', error=True, msg='User not valid')
-
-            session['user'] = user
+        if user and password:       
+            query = { "email" : details['email'],
+                    "password" : details['password'] }
+            
+            response = requests.post("http://localhost:5000/litescale/api/users", json=query)
+            response_json = response.json()
+             
+            if not response or response.status_code > 399: 
+                return render_template('registration.html', error=True, msg=response_json['message'])
+            
+            session['user'] = response_json['email']
+            # session['token'] = 
             # -> redirect to HOME MENU'
-            return redirect(url_for('home', user=user))
+            return redirect(url_for('home', user=response_json['email']))
 
         else:  # empty fields
             return render_template('registration.html', error=True, msg='Complete all fields')

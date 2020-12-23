@@ -1,29 +1,30 @@
 from flask import Flask, jsonify, abort, make_response, url_for
-from flask_restful import Api, Resource, fields, marshal
+from flask_restful import Api, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from webargs.flaskparser import use_args
 from webargs import fields
-import json
-from webargs.flaskparser import use_args, use_kwargs, parser
 from litescale import *
-
-# QUESTION:
-# - abort or return error?
-# TO DO:
-# security authentication
-# authorization resource
-
-app = Flask(__name__)
-api = Api(app)
-
+import json
 
 AUTHORIZED = 'authorized'
 OWNER = 'owner'
 
-# Return validation errors as JSON
+app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 't1NP63m4wnBg6nyHYKfmc2TpCOGI4nss'
+api = Api(app)
+jwt = JWTManager(app)
+
+# STATUS CODE:
 # 404 not found
 # 401 not authorized
-@app.errorhandler(422) # Unprocessable Entity
-@app.errorhandler(400) # Bad request
+# 422 unprocessable Entity
+# 400 bad request
+# 409 conflict
+
+# Return validation errors as JSON
+@app.errorhandler(422) 
+@app.errorhandler(400) 
 def handle_error(err):
     headers = err.data.get("headers", None)
     messages = err.data.get("messages", ["Invalid request."])
@@ -33,24 +34,43 @@ def handle_error(err):
         return jsonify({"errors": messages}), err.code
     
     
+
+# ---------------------------------------LOGIN RESOURCE----------------------------------------------- #
+
+class LoginAPI(Resource):
+    def __init__(self):
+        super(LoginAPI, self).__init__()
+       
+    user_args = {
+        "email": fields.Str(required=True),
+        "password": fields.Str(required=True)
+    }  
+    
+    @use_args(user_args, location="json")  
+    def post(self, args): 
+        email = args['email']
+        password = args['password']
+        
+        rst, user = search_user(email);
+        
+        if not rst:
+            abort(404, description="User not found")
+            
+        if not check_password_hash(user[0][1], password):  # check password
+            abort(401, description="Incorrect email or password")
+        
+        ret = {'AccessToken': create_access_token(identity=email)}
+        return jsonify(ret) # token
+        
+# ---------------------------------------------------------------------------------------------------- #
+    
+    
 # ----------------------------------------USERS RESOURCE---------------------------------------------- #
 
 class UsersAPI(Resource):
     def __init__(self):
         super(UsersAPI, self).__init__()
-        
-       
-    # Return user info (email and password)   ??? 
-    @use_args({"email": fields.Str(required=True)}, location="query")
-    def get(self, args): 
-        rst, user = search_user(args['email']);
-        
-        if (rst):
-            return {'email': user[0][0], 'passwordHash': user[0][1]}
-        else:
-            return {'Error': 'User not found'}
-    
-         
+             
     user_args = {
         "email": fields.Str(required=True),
         "password": fields.Str(required=True)
@@ -67,11 +87,12 @@ class UsersAPI(Resource):
         result, msg = insert_user(email, password)
         if not result:  
             # existing user
-            return {'Error': 'Existing user'}
+            abort(409, description="User already exists")
         
-        return jsonify({ 'email': email }, 201, {'Location': url_for('users', email=email,_external = True)})
+        return jsonify({ 'email': email, 'Location': url_for('users', email=email,_external = True)})
     
-    # Delete user  
+    # Delete user 
+    @jwt_required 
     @use_args({"email": fields.Str(required=True)}, location="query")
     def delete(self, args): 
         email = args['email']
@@ -79,9 +100,9 @@ class UsersAPI(Resource):
         rst, msg = delete_user(email)
     
         if not rst:
-            abort(404);
+            abort(404, description="User not found");
             
-        return jsonify({"result": "True"}, 200)
+        return {"result": "True"}
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -98,18 +119,19 @@ class ProjectListAPI(Resource):
     }     
        
     # Return project list 
+    @jwt_required
     @use_args(user_args, location="json") 
     def get(self, args): 
         email = args['email']
         accessType = args['accessType']
         
         if (accessType != AUTHORIZED and accessType != OWNER):
-            abort(400)
+            abort(400, description="Indicate type of list: owner or authorized")
             
         rst, msg = search_user(args['email']);
         
         if not rst:
-            abort(404)
+            abort(404, "User not found")
     
         if accessType == AUTHORIZED:
             project_list = all_project_list(email)
@@ -141,6 +163,7 @@ class ProjectsAPI(Resource):
         
           
     # Return project info 
+    @jwt_required
     @use_args({"id": fields.Int(required=True)}, location="query")
     def get(self, args):
         project_id = args['id']
@@ -148,11 +171,12 @@ class ProjectsAPI(Resource):
         rst, project_dict = get_project(project_id)
         
         if not rst:
-            abort(404)
+            abort(404, description="Project not found")
         
         return project_dict
     
     # Delete project
+    @jwt_required
     @use_args({"id": fields.Int(required=True)}, location="query")
     def delete(self, args):
         project_id = args['id']
@@ -160,9 +184,9 @@ class ProjectsAPI(Resource):
         rst, msg = delete_project(project_id) 
         
         if not rst:
-            return {'Error': msg} # or abort ?
+            abort(404, description="Project not found")
         
-        return jsonify({"result": "True"}, 200)
+        return {"result": "True"}
     
     
     user_args = {
@@ -174,6 +198,7 @@ class ProjectsAPI(Resource):
     } 
     
     #Create a new project
+    @jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
         email = args['email']
@@ -194,7 +219,7 @@ class ProjectsAPI(Resource):
         if (not project_id):  # project not created 
             abort(400)
                
-        return jsonify({"result": "True"}, 201)
+        return {"result": "True"}
     
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -211,6 +236,7 @@ class TuplesAPI(Resource):
     }
     
     # Get next tuple to annotate
+    @jwt_required
     @use_args(user_args, location="json")
     def get(self, args):
         email = args['email']
@@ -241,6 +267,7 @@ class AnnotationsAPI(Resource):
     }
     
     # Add annotation into db
+    @jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
         email = args['email']
@@ -254,7 +281,7 @@ class AnnotationsAPI(Resource):
 
 # ---------------------------------------------------------------------------------------------------- #
 
-# ------------------------------.......-------GOLD RESOURCE------------------------------------------- #
+# --------------------------------------------GOLD RESOURCE------------------------------------------- #
 
 class GoldAPI(Resource):
     def __init__(self):
@@ -266,6 +293,7 @@ class GoldAPI(Resource):
     }
     
     # Add annotation into db
+    @jwt_required
     @use_args(user_args, location="json")
     def get(self, args):
         project_id = args['project_id']
@@ -273,13 +301,14 @@ class GoldAPI(Resource):
         rst, file = generate_gold(project_id)
 
         if not rst:
-            abort(404)
+            abort(404, description="Project not found")
          
         response = make_response(file)   
         response.headers['content-type'] = 'application/octet-stream'
         return response
 
 
+api.add_resource(LoginAPI, '/litescale/api/login', endpoint='login')
 api.add_resource(UsersAPI, '/litescale/api/users', endpoint='users')
 api.add_resource(ProjectListAPI, '/litescale/api/projectList', endpoint='projects')
 api.add_resource(ProjectsAPI, '/litescale/api/projects', endpoint='project')
