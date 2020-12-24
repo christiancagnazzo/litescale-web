@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort, make_response, url_for
+from flask import Flask, jsonify, abort, make_response, url_for, request
 from flask_restful import Api, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
@@ -6,6 +6,7 @@ from webargs.flaskparser import use_args
 from webargs import fields
 from litescale import *
 import json
+import os
 
 AUTHORIZED = 'authorized'
 OWNER = 'owner'
@@ -192,22 +193,20 @@ class ProjectsAPI(Resource):
 
         return {"result": "True"}
 
-    user_args = {
-        "project_name": fields.Str(required=True),
-        "phenomenon": fields.Str(required=True),
-        "tuple_size": fields.Int(required=True),
-        "replication": fields.Int(required=True)
-    }
-
+    
     # Create a new project
     @jwt_required
-    @use_args(user_args, location="json")
-    def post(self, args):
+    @use_args({"file": fields.Field(required=True)}, location="files")
+    def post(self, files):  
         email = get_jwt_identity()
-        project_name = args['project_name']
-        tuple_size = args['tuple_size']
-        phenomenon = args['phenomenon']
-        replication = args['replication']
+        request.files['file'].save('instance_file.tsv')
+
+        # !!
+        info = json.loads((request.form['json']))
+        project_name = info['project_name']
+        tuple_size = info['tuple_size']
+        phenomenon = info['phenomenon']
+        replication = info['replication']
 
         project_id, msg = new_project(
             email,
@@ -215,8 +214,13 @@ class ProjectsAPI(Resource):
             phenomenon,
             tuple_size,
             replication,
-            'example.tsv'  # !!!! add instance file !!!!
+            'instance_file.tsv'
         )
+        
+        try:
+            os.remove('tmp.tsv')
+        except:
+            pass
 
         if (not project_id):  # project not created
             abort(400, description=msg)
@@ -370,11 +374,6 @@ class AuthorizationAPI(Resource):
 
         if not rst:
             abort(401, description=msg)
-            
-        """rst, user = search_user(user_to)
-
-        if not rst:
-            abort(404, description="User to authorize")"""
             
         rst, msg = get_authorization(project_id, user_to)
         

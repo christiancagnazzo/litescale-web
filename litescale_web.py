@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, session, redirect, url_for
-from litescale import *  # to remove
+from flask import Flask, render_template, request, session, redirect, url_for, make_response
 import json
 import requests
+import os 
 
 # User default: root / 1234
 
@@ -133,12 +133,17 @@ def new(user):
                 query = {'project_name': project_name,
                          'phenomenon': phenomenon,
                          'tuple_size': tuple_size,
-                         'replication': replication}
-
+                         'replication': replication }
+                
+                files = {
+                    'json': (None, json.dumps(query), 'application/json'),
+                    'file': (os.path.basename('tmp.tsv'), open('tmp.tsv', 'rb'), 'application/octet-stream')
+                }
+                
                 headers = {'Authorization': 'Bearer {}'.format(
                     session.get('token'))}
                 response = requests.post(
-                    'http://localhost:5000/litescale/api/projects', json=query, headers=headers)
+                    'http://localhost:5000/litescale/api/projects', json=query, headers=headers, files=files)
                 response_json = response.json()
 
                 try:

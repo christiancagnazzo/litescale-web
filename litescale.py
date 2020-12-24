@@ -144,7 +144,7 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
     # Owner authorization
     get_authorization(project_id, user)
 
-    # Insert instance into the db (!!!! instance file !!!)
+    # Insert instance into the db
     instances = []
     with open(instance_file) as f:
         for line in f:
