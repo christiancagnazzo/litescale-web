@@ -364,6 +364,20 @@ def delete(user):
 @app.route('/<user>/authorization', methods=['GET', 'POST'])
 def authorization(user):
     if session.get('user') == user:
+        
+        headers = {'Authorization': 'Bearer {}'.format(
+            session.get('token'))}
+
+        type_list = {"type": "owner"}
+        response = requests.get(
+            "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+        project_list = response.json()
+        
+        if not response or response.status_code > 399:
+            return render_template('projects.html', user=user, action='authorization', rep=True, msg=response['message'])
+        
+        if 'Error' in project_list:
+            return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['Error'])
 
         # POST
         if request.method == 'POST':
@@ -372,17 +386,21 @@ def authorization(user):
             user_to = details['user']
 
             if (not project_id or not user_to):  # empty fields
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=own_project_list(user))
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
 
-            """rst, msg = check_authorization(project_id,user)
-            if (not rst): # user not authorized
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))"""
+            query = {"project_id": project_id, "user_to": user_to}
+            response = requests.post(
+                "http://localhost:5000/litescale/api/auhtorizations", json=query, headers=headers)
+            response_json = response.json()
 
-            rst, msg = get_authorization(project_id, user_to)
-            return render_template('authorization.html', user=user, action='authorization', rep=True, msg=msg, project_list=own_project_list(user))
+            if not response or response.status_code > 399:
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=response_json['message'], project_list=project_list)
+
+            if 'result' in response_json and response_json['result'] == 'True':
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list)
 
         # GET
-        return render_template('authorization.html', user=user, action='authorization', project_list=own_project_list(user))
+        return render_template('authorization.html', user=user, action='authorization', project_list=project_list)
     else:
         return redirect('/')
 

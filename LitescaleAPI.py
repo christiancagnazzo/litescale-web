@@ -346,6 +346,45 @@ class ProgressAPI(Resource):
 # ---------------------------------------------------------------------------------------------------- #
 
 
+
+# -------------------------------------AUTHORIZATION RESOURCE----------------------------------------- #
+
+class AuthorizationAPI(Resource):
+    def __init__(self):
+        super(AuthorizationAPI, self).__init__()
+
+    user_args = {
+        "project_id": fields.Int(required=True),
+        "user_to": fields.String(required=True),
+    }
+
+    # Add authorization
+    @jwt_required
+    @use_args(user_args, location="json")
+    def post(self, args):
+        email = get_jwt_identity()
+        project_id = args['project_id']
+        user_to = args['user_to']
+        
+        rst, msg = check_owner(project_id, email)
+
+        if not rst:
+            abort(401, description=msg)
+            
+        """rst, user = search_user(user_to)
+
+        if not rst:
+            abort(404, description="User to authorize")"""
+            
+        rst, msg = get_authorization(project_id, user_to)
+        
+        if not rst:
+            abort(400, description=msg)
+            
+        return {'result': 'True'}
+            
+# ---------------------------------------------------------------------------------------------------- #
+
 api.add_resource(LoginAPI, '/litescale/api/login', endpoint='login')
 api.add_resource(UsersAPI, '/litescale/api/users', endpoint='users')
 api.add_resource(ProjectListAPI, '/litescale/api/projectList',endpoint='projects')
@@ -354,6 +393,7 @@ api.add_resource(TuplesAPI, '/litescale/api/tuples', endpoint='tuples')
 api.add_resource(AnnotationsAPI, '/litescale/api/annotations', endpoint='annotation')
 api.add_resource(GoldAPI, '/litescale/api/gold', endpoint='gold')
 api.add_resource(ProgressAPI, '/litescale/api/progress', endpoint='progress')
+api.add_resource(AuthorizationAPI, '/litescale/api/auhtorizations', endpoint='authorization')
 
 
 if __name__ == '__main__':
