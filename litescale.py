@@ -314,7 +314,7 @@ def generate_gold(project_id):
     rst, project_dict = get_project(project_id)
 
     if not rst:
-        return ERROR, None
+        return ERROR, "Project not found"
 
     ids = set()
     texts = dict()

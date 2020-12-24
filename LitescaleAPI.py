@@ -120,7 +120,7 @@ class ProjectListAPI(Resource):
     @use_args({"type": fields.Str(required=True)}, location="query") # authorized or owner
     def get(self, args):
         email = get_jwt_identity()
-        typeList = args['typeList']
+        typeList = args['type']
 
         if (typeList != AUTHORIZED and typeList != OWNER):
             abort(400, description="Indicate type of list: owner or authorized")
@@ -309,7 +309,7 @@ class GoldAPI(Resource):
         rst, file = generate_gold(project_id)
 
         if not rst:
-            abort(404, description="Project not found")
+            abort(404, description=file)
 
         response = make_response(file)
         response.headers['content-type'] = 'application/octet-stream'

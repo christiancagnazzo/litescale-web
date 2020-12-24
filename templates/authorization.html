@@ -23,8 +23,8 @@ function post_request(project_id){
     
     {%for project in project_list:%}
     <tr>
-        <td><p onclick="post_request('{{project[0]}}')">{{project[1]}}</p></td>
-        <td>{{project[2]}}</td>
+        <td><p onclick="post_request('{{project['projectId']}}')">{{project['projectName']}}</p></td>
+        <td>{{project['projectOwner']}}</td>
     <th>    
     {% endfor %}
 </table>
