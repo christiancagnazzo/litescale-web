@@ -5,25 +5,25 @@
 <a id="logout" href="logout">Log out</a>
 </div>
 <hr>
-<div class="home">
-    <div class="section">
-        <div class="container bgblue">
+<div>
+    <div>
+        <div>
             <span><a href="/{{user}}/start">Start or continue to annotate yours projects</a><span>
         </div>
-        <div class="container bggreen">
+        <div>
             <span><a href="/{{user}}/gold">Generate the gold standard file of a project</a><span>
         </div>
-        <div class="container bgred">
+        
             <span><a href="/{{user}}/new">Create a new project</a><span>
         </div>
-        <div class="container bgblue">
+        <div>
             <span><a href="/{{user}}/authorization">Give permission for your project to another user</a><span>
         </div>
-        <div class="container bggreen">
+        <div>
             <span><a href="/{{user}}/delete">Delete a your project (All annotations made will be deleted)</a><span>
         </div>
-        <div class="container bgred">
-            <span><a href="" onclick="delete_account()">Delete your account</a><span>
+        <div>
+            <span><p onclick="delete_account()">Delete your account</p><span>
         </div>
     </div>
 </div>
@@ -31,7 +31,7 @@
 <script>
 function delete_account(){
     if (confirm("Are you sure you want to delete the account?")) {
-        window.location.href = "delete_account/root1";
+        window.location.href = "delete_account";
     }
 }
 </script>

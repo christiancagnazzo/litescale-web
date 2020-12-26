@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, session, redirect, url_for, make_response
 import json
 import requests
+import smtplib
 import os 
 
 # User default: root / 1234
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'litescale'  # Session key
-
 
 @app.route('/')
 def main():
@@ -415,13 +415,12 @@ def authorization(user):
 
 # --------------------------------------- DELETE ACCOUNT --------------------------------------------- #
 
-@app.route('/delete_account')
+@app.route('/<user>/delete_account')
 def delete_account(user):
     if session.get('user') == user:
         # delete account
         headers = {'Authorization': 'Bearer {}'.format(session.get('token'))}
-        requests.delete(
-            "http://localhost:5000/litescale/api/login", headers=headers)
+        requests.delete("http://localhost:5000/litescale/api/users", headers=headers)    
         return redirect('/')
     else:
         return redirect('/')

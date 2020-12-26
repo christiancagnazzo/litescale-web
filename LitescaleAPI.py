@@ -23,9 +23,7 @@ jwt = JWTManager(app)
 # 400 bad request
 # 409 conflict
 
-# Return validation errors as JSON
-
-
+# Return validation errors as JSON (when missing input)
 @app.errorhandler(422)
 @app.errorhandler(400)
 def handle_error(err):
