@@ -124,11 +124,12 @@ def new(user):
             project_name = details['project_name']
             phenomenon = details['phenomenon']
             tuple_size = eval(details['tuple_size'])
-            replication = eval(details['replication'])
-            request.files.get('instance_file').save('tmp.tsv')
-
+            replication = eval(details['replication'])        
+            instance_file = request.files.get('instance_file')
+    
             # new project
-            if (project_name and phenomenon and request.files.get('instance_file')):
+            if (project_name and phenomenon and instance_file):
+                instance_file.save(instance_file.filename)
 
                 query = {'project_name': project_name,
                          'phenomenon': phenomenon,
@@ -137,7 +138,7 @@ def new(user):
                 
                 files = {
                     'json': (None, json.dumps(query), 'application/json'),
-                    'file': (os.path.basename('tmp.tsv'), open('tmp.tsv', 'rb'), 'application/octet-stream')
+                    'file': (os.path.basename(instance_file.filename), open(instance_file.filename, 'rb'), 'application/octet-stream')
                 }
                 
                 headers = {'Authorization': 'Bearer {}'.format(
@@ -147,7 +148,7 @@ def new(user):
                 response_json = response.json()
 
                 try:
-                    os.remove('tmp.tsv')
+                    os.remove(instance_file.filename)
                 except:
                     pass
 

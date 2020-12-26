@@ -131,6 +131,7 @@ def make_tuples(instances, k, p):
 def new_project(user, project_name, phenomenon, tuple_size, replication, instance_file):
     # Insert project into db
     db = Dbconnect()
+    
     project_id = db.insert('Project',
                            INSERT,
                            ProjectName=project_name,
@@ -147,10 +148,16 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
     # Insert instance into the db
     instances = []
     with open(instance_file) as f:
-        for line in f:
-            id, text = line.strip().split("\t")
-            instances.append({"id": id, "text": text})
-            db.insert('Instance', INSERT_IGNORE, id, text, project_id)
+        try:
+            for line in f:
+                id, text = line.strip().split("\t")
+                instances.append({"id": id, "text": text})
+                db.insert('Instance', INSERT_IGNORE, id, text, project_id)
+        except:
+            condition = 'ProjectId = %s'
+            db.delete('Project', condition, project_id)
+            return ERROR, "Wrong instance file format"
+            
 
     # Make tuples
     tuples = make_tuples(instances, tuple_size, replication)

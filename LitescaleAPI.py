@@ -155,7 +155,6 @@ class ProjectsAPI(Resource):
         super(ProjectsAPI, self).__init__()
 
     # Return project info
-
     @jwt_required
     @use_args({"project_id": fields.Int(required=True)}, location="query")
     def get(self, args):
@@ -199,10 +198,28 @@ class ProjectsAPI(Resource):
     @use_args({"file": fields.Field(required=True)}, location="files")
     def post(self, files):  
         email = get_jwt_identity()
-        request.files['file'].save('instance_file.tsv')
-
-        # !!
+        
+        if not request.files or not request.form:
+            abort(400, description="Missing instance file or project info")
+            
+        if not request.files['file']:
+            abort(400, description="Missing instance file")
+            
+        if not request.form['json']:
+            abort(400, description="Missing project info")
+            
         info = json.loads((request.form['json']))
+        
+        if not info['project_name'] or not info['tuple_size'] or not info['phenomenon'] or not info['replication']:
+                abort(400, description="Missing project info")
+        
+        instance_file =  request.files['file']
+        file_name, extension = os.path.splitext(instance_file.filename)
+    
+        if extension != ".tsv":
+            abort(400, description="Upload a tsv file")
+        
+        instance_file.save('instance_file.tsv')
         project_name = info['project_name']
         tuple_size = info['tuple_size']
         phenomenon = info['phenomenon']
@@ -218,7 +235,7 @@ class ProjectsAPI(Resource):
         )
         
         try:
-            os.remove('tmp.tsv')
+            os.remove('instance_file.tsv')
         except:
             pass
 
