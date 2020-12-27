@@ -7,6 +7,7 @@ from webargs import fields
 from litescale import *
 import json
 import os
+import re
 
 AUTHORIZED = 'authorized'
 OWNER = 'owner'
@@ -15,24 +16,6 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 't1NP63m4wnBg6nyHYKfmc2TpCOGI4nss'
 api = Api(app)
 jwt = JWTManager(app)
-
-# STATUS CODE:
-# 404 not found
-# 401 not authorized
-# 422 unprocessable Entity
-# 400 bad request
-# 409 conflict
-
-# Return validation errors as JSON (when missing input)
-@app.errorhandler(422)
-@app.errorhandler(400)
-def handle_error(err):
-    headers = err.data.get("headers", None)
-    messages = err.data.get("messages", ["Invalid request."])
-    if headers:
-        return jsonify({"errors": messages}), err.code, headers
-    else:
-        return jsonify({"errors": messages}), err.code
 
 
 # ---------------------------------------LOGIN RESOURCE----------------------------------------------- #
@@ -81,6 +64,10 @@ class UsersAPI(Resource):
     def post(self, args):
         email = args['email']
         password = args['password']
+        
+        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+        if not re.search(regex,email): 
+            abort(400, description="Insert a valid email")
 
         password = generate_password_hash(password)
 
@@ -408,6 +395,20 @@ api.add_resource(AnnotationsAPI, '/litescale/api/annotations', endpoint='annotat
 api.add_resource(GoldAPI, '/litescale/api/gold', endpoint='gold')
 api.add_resource(ProgressAPI, '/litescale/api/progress', endpoint='progress')
 api.add_resource(AuthorizationAPI, '/litescale/api/auhtorizations', endpoint='authorization')
+
+
+# STATUS CODE:
+# 404 not found
+# 401 not authorized
+# 422 unprocessable Entity
+# 400 bad request
+# 409 conflict
+
+# Return validation errors as JSON (when missing input)
+@app.errorhandler(422)
+@app.errorhandler(400)
+def handle_error(err):
+    abort(400, description="Missing input")
 
 
 if __name__ == '__main__':

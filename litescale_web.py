@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request, session, redirect, url_for, make_response
+from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import requests
-import smtplib
 import os 
 
 # User default: root / 1234
@@ -29,8 +28,7 @@ def login():
             return render_template('login.html', error=True, msg='Complete all fields')
 
         query = {"email": user, "password": password}
-        response = requests.post(
-            "http://localhost:5000/litescale/api/login", json=query)
+        response = make_request('Login','post',query)
         response_json = response.json()
 
         if not response or response.status_code > 399:
@@ -75,8 +73,7 @@ def signUp():
             query = {"email": details['email'],
                      "password": details['password']}
 
-            response = requests.post(
-                "http://localhost:5000/litescale/api/users", json=query)
+            response = make_request('Users','post',query)
             response_json = response.json()
 
             if not response or response.status_code > 399:
@@ -140,17 +137,18 @@ def new(user):
                     'json': (None, json.dumps(query), 'application/json'),
                     'file': (os.path.basename(instance_file.filename), open(instance_file.filename, 'rb'), 'application/octet-stream')
                 }
-                
-                headers = {'Authorization': 'Bearer {}'.format(
-                    session.get('token'))}
-                response = requests.post(
-                    'http://localhost:5000/litescale/api/projects', json=query, headers=headers, files=files)
-                response_json = response.json()
 
+                response = make_request('Projects','post',query,files)
+                
                 try:
                     os.remove(instance_file.filename)
                 except:
                     pass
+
+                if response.status_code == 401:
+                    return redirect("/")
+                
+                response_json = response.json()
 
                 if not response or response.status_code > 399:
                     return render_template('new.html',  user=user, rep=True, msg=response_json['message'])
@@ -176,12 +174,12 @@ def new(user):
 def start(user):
     if session.get('user') == user:
 
-        headers = {'Authorization': 'Bearer {}'.format(
-            session.get('token'))}
-
-        type_list = {"type": "authorized"}
-        response = requests.get(
-            "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+        type_list = {"stype": "authorized"}
+        response = make_request('ProjectList', 'get', type_list)
+        
+        if response.status_code == 401:
+            return redirect("/")
+        
         project_list = response.json()
 
         if not response or response.status_code > 399:
@@ -206,24 +204,31 @@ def start(user):
                      "answer_best": answer_best,
                      "answer_worst": answer_worst}
 
-            requests.post(
-                "http://localhost:5000/litescale/api/annotations", headers=headers, json=query)
+            response = make_request('Annotations', 'post', query)
+            
+            if response.status_code == 401:
+                return redirect("/")
 
         # POST -> start annotation
         if request.method == 'POST':
             project_id = request.form['project_id']
             params = {"project_id": project_id}
             
-
-            response = requests.get(
-                "http://localhost:5000/litescale/api/projects", headers=headers, params=params)
+            response = make_request('Projects','get',params)
+            
+            if response.status_code == 401:
+                return redirect("/")
+                
             project_dict = response.json()
 
             if not response or response.status_code > 399:
                 return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=response_json['message'])
 
-            response = requests.get(
-                "http://localhost:5000/litescale/api/tuples", headers=headers, params=params)
+            response = make_request('Tuples','get',params)
+            
+            if response.status_code == 401:
+                return redirect("/")
+                
             tuples = response.json()
 
             if not response or response.status_code > 399:
@@ -233,8 +238,11 @@ def start(user):
                 return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['Error'])
 
             # progress
-            response = requests.get(
-                "http://localhost:5000/litescale/api/progress", headers=headers, params=params)
+            response = make_request('Progress','get',params)
+            
+            if response.status_code == 401:
+                return redirect("/")
+                
             progress = response.json()
 
             if not response or response.status_code > 399:
@@ -263,12 +271,12 @@ def start(user):
 def gold(user):
     if session.get('user') == user:
         
-        headers = {'Authorization': 'Bearer {}'.format(
-            session.get('token'))}
-
         type_list = {"type": "authorized"}
-        response = requests.get(
-            "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+        response = make_request('ProjectList','get', type_list)
+        
+        if response.status_code == 401:
+            return redirect("/")
+        
         project_list = response.json()
         
         if not response or response.status_code > 399:
@@ -283,10 +291,10 @@ def gold(user):
             project_id = request.form['project_id']
 
             params = {'project_id': project_id}
-            headers = {'Authorization': 'Bearer {}'.format(
-                session.get('token'))}
-            response = requests.get(
-                'http://localhost:5000/litescale/api/gold', params=params, headers=headers)
+            response = make_request('Gold','get',params)
+            
+            if response.status_code == 401:
+                return redirect("/")
 
             if not response or response.status_code > 399:
                 response = response.json()
@@ -313,12 +321,12 @@ def gold(user):
 def delete(user):
     if session.get('user') == user:
         
-        headers = {'Authorization': 'Bearer {}'.format(
-            session.get('token'))}
-
         type_list = {"type": "owner"}
-        response = requests.get(
-            "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+        response = make_request('ProjectList','get',type_list)
+        
+        if response.status_code == 401:
+            return redirect("/")
+        
         project_list = response.json()
         
         if not response or response.status_code > 399:
@@ -333,10 +341,12 @@ def delete(user):
             project_id = request.form['project_id']
 
             params = {"project_id": project_id}
-            headers = {'Authorization': 'Bearer {}'.format(
-                session.get('token'))}
-            response = requests.delete(
-                "http://localhost:5000/litescale/api/projects", params=params, headers=headers)
+            
+            response = make_request('Projects','delete',params)
+        
+            if response.status_code == 401:
+                return redirect("/")
+            
             response_json = response.json()
 
             if not response or response.status_code > 399:
@@ -344,8 +354,11 @@ def delete(user):
 
             # -> PROJECT DELETED
             if 'result' in response_json and response_json['result'] == 'True':
-                response = requests.get(
-                    "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+                response = make_request('ProjectList','get',type_list)
+                
+                if response.status_code == 401:
+                    return redirect("/")
+                
                 project_list = response.json()
         
                 if not response or response.status_code > 399:
@@ -371,12 +384,13 @@ def delete(user):
 def authorization(user):
     if session.get('user') == user:
         
-        headers = {'Authorization': 'Bearer {}'.format(
-            session.get('token'))}
-
         type_list = {"type": "owner"}
-        response = requests.get(
-            "http://localhost:5000/litescale/api/projectList", headers=headers, params=type_list)
+        
+        response = make_request('ProjectList','get',type_list)
+        
+        if response.status_code == 401:
+            return redirect("/")
+        
         project_list = response.json()
         
         if not response or response.status_code > 399:
@@ -395,8 +409,11 @@ def authorization(user):
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
 
             query = {"project_id": project_id, "user_to": user_to}
-            response = requests.post(
-                "http://localhost:5000/litescale/api/auhtorizations", json=query, headers=headers)
+            response = make_request('Authorizations','post',query)
+        
+            if response.status_code == 401:
+                return redirect("/")
+            
             response_json = response.json()
 
             if not response or response.status_code > 399:
@@ -419,13 +436,40 @@ def authorization(user):
 def delete_account(user):
     if session.get('user') == user:
         # delete account
-        headers = {'Authorization': 'Bearer {}'.format(session.get('token'))}
-        requests.delete("http://localhost:5000/litescale/api/users", headers=headers)    
+        response = make_request('Users','delete')
+        if response.status_code == 401:
+            return redirect("/")  
         return redirect('/')
     else:
         return redirect('/')
 
 # ---------------------------------------------------------------------------------------------------- #
+
+
+# Auxiliar function to make a request and return a response
+
+def make_request(resource, type_request, parameters, files=None):
+    if   resource == 'Login': url = "http://localhost:5000/litescale/api/login"
+    elif resource == 'Users': url = "http://localhost:5000/litescale/api/users"
+    elif resource == 'ProjectList': url = "http://localhost:5000/litescale/api/projectList"
+    elif resource == 'Projects': url = "http://localhost:5000/litescale/api/projects"
+    elif resource == 'Tuples': url = "http://localhost:5000/litescale/api/tuples"
+    elif resource == 'Annotations': url = "http://localhost:5000/litescale/api/annotations"
+    elif resource == 'Gold': url = "http://localhost:5000/litescale/api/gold"
+    elif resource == 'Progress': url = "http://localhost:5000/litescale/api/progress"
+    elif resource == 'Auhtorization': url = "http://localhost:5000/litescale/api/auhtorizations"
+    
+    if 'token' in session:
+        headers = {'Authorization': 'Bearer {}'.format(session.get('token'))}
+    else:
+        headers = ""
+        
+    if resource == 'Projects' and type_request == 'post':
+        return requests.post(url, json=parameters, headers=headers, files=files)
+    else:
+        if   type_request == 'get': return requests.get(url, headers=headers, params=parameters)
+        elif type_request == 'post': return requests.post(url, headers=headers, json=parameters)
+        elif type_request == 'delete': return requests.delete(url, headers=headers, params=parameters)
 
 
 if __name__ == '__main__':
