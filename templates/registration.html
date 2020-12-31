@@ -1,23 +1,19 @@
 {% include 'header.html' %}
 
-<div class="flex-col-c logincontainer">
-    <div class="wraplogin">
-        <form class="loginform p-l-55 p-r-55 p-t-178" action="/signUp" method="POST">
-            <span class="loginformtitle signup">Welcome to litescale!</span>
-            <div class="wrapinput m-b-16">
-                <input class="input" type="text" name="email" placeholder="Email">
-            </div>
-            <div class="wrapinput">
-                <input class="input" type="password" name="password" placeholder="Password">
-            </div>
-            <div class="containerloginbtn">
-                <button type="submit" class="signupbtn loginbtn">Sign Up</button>
-            </div>
-            <div class="error p-t-40 text-center pos-relative">
+<div class="container">
+    <div id="signupContainer">
+        <form id="signupForm" action="/signUp" method="POST">
+            <span>Welcome to litescale!</span>
+            <input class="input" type="text" name="email" placeholder="Email">
+            <input class="input" type="password" name="password" placeholder="Password">
+            <input type="submit" value="Sign-Up">
+
+            <div class="error">
             {% if error==True %}
                 <span> {{ msg }} </span>
             {% endif%}
             </div>
+
         </form>
     </div>
 </div>

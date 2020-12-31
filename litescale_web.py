@@ -36,7 +36,8 @@ def login():
 
         # -> redirect to HOME MENU'
         session['user'] = user
-        session['token'] = response_json['AccessToken']
+        session['AccessToken'] = response_json['AccessToken']
+        session['RefreshToken'] = response_json['RefreshToken']
         return redirect(url_for('home', user=user))
 
     # GET
@@ -52,7 +53,7 @@ def login():
 @app.route('/<user>/logout')
 def logout(user):
     session.pop('user', None)
-    session.pop('token', None)
+    session.pop('AccessToken', None)
     return redirect('/')
 
 # ---------------------------------------------------------------------------------------------------- #
@@ -80,7 +81,8 @@ def signUp():
                 return render_template('registration.html', error=True, msg=response_json['message'])
 
             session['user'] = user
-            session['token'] = response_json['AccessToken']
+            session['AccessToken'] = response_json['AccessToken']
+            session['RefreshToken'] = response_json['RefreshToken']
             # -> redirect to HOME MENU'
             return redirect(url_for('home', user=user))
 
@@ -146,7 +148,10 @@ def new(user):
                     pass
 
                 if response.status_code == 401:
-                    return redirect("/")
+                    if not refresh_token():
+                        return redirect("/")
+                    else:
+                        return redirect(request.url)
                 
                 response_json = response.json()
 
@@ -174,11 +179,14 @@ def new(user):
 def start(user):
     if session.get('user') == user:
 
-        type_list = {"stype": "authorized"}
+        type_list = {"type": "authorized"}
         response = make_request('ProjectList', 'get', type_list)
         
         if response.status_code == 401:
-            return redirect("/")
+            if not refresh_token():
+                return redirect("/")
+            else:
+                return redirect(request.url)
         
         project_list = response.json()
 
@@ -207,7 +215,10 @@ def start(user):
             response = make_request('Annotations', 'post', query)
             
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
 
         # POST -> start annotation
         if request.method == 'POST':
@@ -217,7 +228,10 @@ def start(user):
             response = make_request('Projects','get',params)
             
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
                 
             project_dict = response.json()
 
@@ -227,7 +241,10 @@ def start(user):
             response = make_request('Tuples','get',params)
             
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
                 
             tuples = response.json()
 
@@ -241,7 +258,10 @@ def start(user):
             response = make_request('Progress','get',params)
             
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
                 
             progress = response.json()
 
@@ -275,7 +295,10 @@ def gold(user):
         response = make_request('ProjectList','get', type_list)
         
         if response.status_code == 401:
-            return redirect("/")
+            if not refresh_token():
+                return redirect("/")
+            else:
+                return redirect(request.url)
         
         project_list = response.json()
         
@@ -294,7 +317,10 @@ def gold(user):
             response = make_request('Gold','get',params)
             
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
 
             if not response or response.status_code > 399:
                 response = response.json()
@@ -325,7 +351,10 @@ def delete(user):
         response = make_request('ProjectList','get',type_list)
         
         if response.status_code == 401:
-            return redirect("/")
+            if not refresh_token():
+                return redirect("/")
+            else:
+                return redirect(request.url)
         
         project_list = response.json()
         
@@ -345,7 +374,10 @@ def delete(user):
             response = make_request('Projects','delete',params)
         
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
             
             response_json = response.json()
 
@@ -357,7 +389,10 @@ def delete(user):
                 response = make_request('ProjectList','get',type_list)
                 
                 if response.status_code == 401:
-                    return redirect("/")
+                    if not refresh_token():
+                        return redirect("/")
+                    else:
+                        return redirect(request.url)
                 
                 project_list = response.json()
         
@@ -389,7 +424,10 @@ def authorization(user):
         response = make_request('ProjectList','get',type_list)
         
         if response.status_code == 401:
-            return redirect("/")
+            if not refresh_token():
+                return redirect("/")
+            else:
+                return redirect(request.url)
         
         project_list = response.json()
         
@@ -412,7 +450,10 @@ def authorization(user):
             response = make_request('Authorizations','post',query)
         
             if response.status_code == 401:
-                return redirect("/")
+                if not refresh_token():
+                    return redirect("/")
+                else:
+                    return redirect(request.url)
             
             response_json = response.json()
 
@@ -437,8 +478,6 @@ def delete_account(user):
     if session.get('user') == user:
         # delete account
         response = make_request('Users','delete')
-        if response.status_code == 401:
-            return redirect("/")  
         return redirect('/')
     else:
         return redirect('/')
@@ -458,9 +497,9 @@ def make_request(resource, type_request, parameters, files=None):
     elif resource == 'Gold': url = "http://localhost:5000/litescale/api/gold"
     elif resource == 'Progress': url = "http://localhost:5000/litescale/api/progress"
     elif resource == 'Auhtorization': url = "http://localhost:5000/litescale/api/auhtorizations"
-    
-    if 'token' in session:
-        headers = {'Authorization': 'Bearer {}'.format(session.get('token'))}
+        
+    if 'AccessToken' in session:
+        headers = {'Authorization': 'Bearer {}'.format(session.get('AccessToken'))}
     else:
         headers = ""
         
@@ -471,6 +510,21 @@ def make_request(resource, type_request, parameters, files=None):
         elif type_request == 'post': return requests.post(url, headers=headers, json=parameters)
         elif type_request == 'delete': return requests.delete(url, headers=headers, params=parameters)
 
+
+def refresh_token():
+    if 'RefreshToken' in session:
+        headers_r = {'Authorization': 'Bearer {}'.format(session.get('RefreshToken'))}
+        response = requests.post("http://localhost:5000/litescale/api/token", headers=headers_r)
+        response_json = response.json()
+    
+        if response.status_code == 200:
+            session['AccessToken'] = response_json['AccessToken']
+            return True
+    return False
+    
+    
+    
+    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)

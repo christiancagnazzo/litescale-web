@@ -1,6 +1,12 @@
-/* [ Login ] */
+* {
+  margin: 0px; 
+  padding: 0px; 
+  box-sizing: border-box;
+}
 
-.logincontainer {
+/* [ Login / Sign Up ] */
+
+.container {
   width: 100%;  
   min-height: 100vh;
   display: flex;
@@ -12,7 +18,7 @@
   background-color: #fff;
 }
 
-.wraplogin {
+#loginContainer, #signupContainer {
   width: 500px;
   background: #fff;
   border-radius: 20px;
@@ -20,16 +26,15 @@
   box-shadow: 0 3px 20px 0px rgba(0, 0, 0, 0.1);
 }
 
-/*==================================================================
-
-/* [ Form ] */
-
-.loginform {
+#loginForm, #signupForm {
   width: 100%;
   position: relative;
+  padding-left: 55px;
+  padding-right: 55px;
+  padding-top: 180px;
 }
 
-.loginformtitle {
+#loginForm > span, #signupForm > span {
   font-family: JosefinSans-Bold;
   font-size: 30px;
   color: #fff;
@@ -45,49 +50,11 @@
   padding-bottom: 39px;
 }
 
-.signup {
+#signupForm > span {
   background-color: #ff4d4d;
 }
 
-/*==================================================================
-
-/* [ Input ] */
-
-.wrapinput {
-  width: 100%;
-  background-color: #fff;
-  border-radius: 27px;
-  position: relative;
-  z-index: 1;
-}
-
-.input {
-  font-family: Ubuntu-Bold;
-  font-size: 15px;
-  color: #1b3815;
-  line-height: 1.2;
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 55px;
-  background: #ebebeb;
-  border-radius: 27px;
-  padding: 0 35px 0 35px;
-}
-
-
-/*================================================================== */
-
-/* [ Button ] */
-.containerloginbtn {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 22px;
-}
-
-.loginbtn {
+#loginForm input[type=submit], #signupForm input[type=submit] {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -103,17 +70,60 @@
   text-transform: uppercase;
 }
 
-.signupbtn {
+#signupForm input[type=submit] {
   background-color: #ff4d4d;
 }
-  
 
+.error {
+  padding-top: 40px;
+  text-align: center;
+  position: relative;
+  color: red;
+  margin: 10px;
+}
 
+.container input {
+  outline: none;
+  border: none;
+}
 
+#signupNow {
+	display: flex;
+	flex-direction: column;
+  align-items: center;
+  padding-bottom: 40px;
+  padding-top: 50px;
+}
 
+#signupNow span {
+  font-family: Ubuntu-Regular;
+  padding-bottom: 10px;
+  font-size: 15px;
+  color: #999999;
+  line-height: 1.4;
+}
 
+#signupNow a {
+  font-family: Ubuntu-Bold;
+  font-size: 15px;
+  color: #57b846;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
 
-
-
+.input {
+  margin-bottom: 16px;
+  font-family: Ubuntu-Bold;
+  font-size: 15px;
+  color: #1b3815;
+  line-height: 1.2;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 55px;
+  background: #ebebeb;
+  border-radius: 27px;
+  padding: 0 35px 0 35px;
+}
 
 

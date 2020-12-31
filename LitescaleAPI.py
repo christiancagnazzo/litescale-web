@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, abort, make_response, url_for, request
 from flask_restful import Api, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, fresh_jwt_required, jwt_refresh_token_required, create_access_token, create_refresh_token, get_jwt_identity
 from webargs.flaskparser import use_args
 from webargs import fields
 from litescale import *
@@ -42,9 +42,26 @@ class LoginAPI(Resource):
         if not check_password_hash(user[0][1], password):  # check password
             abort(401, description="Incorrect email or password")
 
-        token = {'AccessToken': create_access_token(identity=email)}
+        token = {'AccessToken': create_access_token(identity=email),
+                 'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
 
+# ---------------------------------------------------------------------------------------------------- #
+
+
+# ---------------------------------------REFRESH TOKEN RESOURCE--------------------------------------- #
+
+class RefreshTokenAPI(Resource):
+    def __init__(self):
+        super(RefreshTokenAPI, self).__init__()
+        
+    @jwt_refresh_token_required
+    def post(self):
+        email = get_jwt_identity()
+        new_token = create_access_token(identity=email, fresh=False)
+        
+        return {'AccessToken': new_token}
+    
 # ---------------------------------------------------------------------------------------------------- #
 
 
@@ -395,14 +412,7 @@ api.add_resource(AnnotationsAPI, '/litescale/api/annotations', endpoint='annotat
 api.add_resource(GoldAPI, '/litescale/api/gold', endpoint='gold')
 api.add_resource(ProgressAPI, '/litescale/api/progress', endpoint='progress')
 api.add_resource(AuthorizationAPI, '/litescale/api/auhtorizations', endpoint='authorization')
-
-
-# STATUS CODE:
-# 404 not found
-# 401 not authorized
-# 422 unprocessable Entity
-# 400 bad request
-# 409 conflict
+api.add_resource(RefreshTokenAPI, '/litescale/api/token', endpoint='refresh')
 
 # Return validation errors as JSON (when missing input)
 @app.errorhandler(422)
