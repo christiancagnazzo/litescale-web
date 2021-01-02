@@ -27,17 +27,18 @@ def login():
         if (not user or not password):  # empty fields
             return render_template('login.html', error=True, msg='Complete all fields')
 
-        query = {"email": user, "password": password}
-        response = make_request('Login','post',query)
-        response_json = response.json()
-
-        if not response or response.status_code > 399:
-            return render_template('login.html', error=True, msg=response_json['message'])
-
-        # -> redirect to HOME MENU'
+        
+        try:
+            params = {"email": user, "password": password}
+            response = requests.post(make_url('Login'), json=params)
+            responsej = response.json()
+            response.raise_for_status()
+        except:
+            return render_template('login.html', error=True, msg=responsej['message'])
+           
+         # -> redirect to HOME MENU'
         session['user'] = user
-        session['AccessToken'] = response_json['AccessToken']
-        session['RefreshToken'] = response_json['RefreshToken']
+        session['AccessToken'] = responsej['AccessToken']
         return redirect(url_for('home', user=user))
 
     # GET
@@ -71,18 +72,18 @@ def signUp():
         password = details['password']
 
         if user and password:
-            query = {"email": details['email'],
+            params = {"email": details['email'],
                      "password": details['password']}
 
-            response = make_request('Users','post',query)
-            response_json = response.json()
-
-            if not response or response.status_code > 399:
-                return render_template('registration.html', error=True, msg=response_json['message'])
+            try:
+                response = requests.post(make_url('Users'), json=params)
+                responsej = response.json()
+                response.raise_for_status()
+            except:
+                return render_template('registration.html', error=True, msg=responsej['message'])
 
             session['user'] = user
-            session['AccessToken'] = response_json['AccessToken']
-            session['RefreshToken'] = response_json['RefreshToken']
+            session['AccessToken'] = responsej['AccessToken']
             # -> redirect to HOME MENU'
             return redirect(url_for('home', user=user))
 
@@ -485,9 +486,9 @@ def delete_account(user):
 # ---------------------------------------------------------------------------------------------------- #
 
 
-# Auxiliar function to make a request and return a response
+# Auxiliar functions to make a url and header request
 
-def make_request(resource, type_request, parameters, files=None):
+def make_url(resource):
     if   resource == 'Login': url = "http://localhost:5000/litescale/api/login"
     elif resource == 'Users': url = "http://localhost:5000/litescale/api/users"
     elif resource == 'ProjectList': url = "http://localhost:5000/litescale/api/projectList"
@@ -497,34 +498,16 @@ def make_request(resource, type_request, parameters, files=None):
     elif resource == 'Gold': url = "http://localhost:5000/litescale/api/gold"
     elif resource == 'Progress': url = "http://localhost:5000/litescale/api/progress"
     elif resource == 'Auhtorization': url = "http://localhost:5000/litescale/api/auhtorizations"
-        
+    
+    return url;
+    
+
+def make_header():
     if 'AccessToken' in session:
-        headers = {'Authorization': 'Bearer {}'.format(session.get('AccessToken'))}
-    else:
-        headers = ""
-        
-    if resource == 'Projects' and type_request == 'post':
-        return requests.post(url, json=parameters, headers=headers, files=files)
-    else:
-        if   type_request == 'get': return requests.get(url, headers=headers, params=parameters)
-        elif type_request == 'post': return requests.post(url, headers=headers, json=parameters)
-        elif type_request == 'delete': return requests.delete(url, headers=headers, params=parameters)
+        return {'Authorization': 'Bearer {}'.format(session.get('AccessToken'))}
+    return None
+    
 
-
-def refresh_token():
-    if 'RefreshToken' in session:
-        headers_r = {'Authorization': 'Bearer {}'.format(session.get('RefreshToken'))}
-        response = requests.post("http://localhost:5000/litescale/api/token", headers=headers_r)
-        response_json = response.json()
-    
-        if response.status_code == 200:
-            session['AccessToken'] = response_json['AccessToken']
-            return True
-    return False
-    
-    
-    
-    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)
