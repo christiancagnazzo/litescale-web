@@ -1,10 +1,60 @@
 {% include 'header.html' %}
 
-<div class="welcome">
-<span>Welcome, {{user}}</span>
-<a id="logout" href="logout">Log out</a>
+<!-- Header -->
+<header class="w3-container w3-green w3-center" style="padding-top:35px">
+  <h1 class="w3-margin w3-jumbo">Welcome to LITESCALE</h1>
+</header>
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h1>Start to annotate your project with the BWS method</h1>
+      <h5 class="w3-padding-10">The Best-Worst Scaling model (BWS) is a comparative annotation process
+                                developed by Louviere and Woodworth (1991).
+                                In a nutshell, a BWS model presents annotators
+                                with n items at a time (where n > 1 and nor-
+                                mally n = 4) and asks them to pick the best and
+                                worst ones with regard to a given property. The
+                                model has been used in particular by Kiritchenko
+                                and Mohammad (2017) and Mohammad and Kir-
+                                itchenko (2018), who proved it to be particularly
+                                effective for subjective tasks such as sentiment in-
+                                tensity annotation, which are intrinsically nuanced
+                                and hardly fit in any fixed scale.</h5>
+    </div>
+    <div class="w3-third w3-center">
+      <i class="fa fa-book w3-padding-64 w3-text-green w3-margin-right"></i>
+    </div>
+  </div>
 </div>
-<hr>
+
+<!-- Second Grid -->
+<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
+  <div class="w3-content">
+    <div class="w3-third w3-center">
+      <i class="fa fa-book w3-padding-64 w3-text-green w3-margin-right"></i>
+    </div>
+
+    <div class="w3-twothird">
+      <h1>BWS</h1>
+      <h5 class="w3-padding-10">The Best-Worst Scaling model (BWS) is a comparative annotation process
+                                developed by Louviere and Woodworth (1991).
+                                In a nutshell, a BWS model presents annotators
+                                with n items at a time (where n > 1 and nor-
+                                mally n = 4) and asks them to pick the best and
+                                worst ones with regard to a given property. The
+                                model has been used in particular by Kiritchenko
+                                and Mohammad (2017) and Mohammad and Kir-
+                                itchenko (2018), who proved it to be particularly
+                                effective for subjective tasks such as sentiment in-
+                                tensity annotation, which are intrinsically nuanced
+                                and hardly fit in any fixed scale.</h5>
+    </div>
+  </div>
+</div>
+
+<!--
 <div>
     <div>
         <div>
@@ -35,5 +85,6 @@ function delete_account(){
     }
 }
 </script>
+-->
 
 {% include 'footer.html' %}
