@@ -3,7 +3,6 @@ from werkzeug.exceptions import HTTPException
 from webargs.flaskparser import parser
 from flask import abort
 
-
 class InternalServerError(HTTPException):
     pass
 
@@ -62,7 +61,7 @@ errors = {
     },
     "UnauthorizedProjectError": {
         "message": "User not auhtorized",
-        "status": 400
+        "status": 401
     },
     "InvalidFileUploadError": {
         "message": "Invalid file, upload a tsv file",
@@ -84,24 +83,3 @@ errors = {
 def handle_error(error, req, schema, *, error_status_code, error_headers):
     fields = list(error.args[0].keys())
     abort(400, description="Missing fields: "+"-".join(fields))
-   
-   
-"""
-
-expired_token_loader()
-
-Funzione da chiamare quando un token scaduto accede a un endpoint protetto
-
-invalid_token_loader()
-
-Funzione da chiamare quando un token non valido accede a un endpoint protetto
-
-needs_fresh_token_loader()
-
-Funzione da chiamare quando un token non aggiornato accede a un fresh_jwt_required()endpoint
-
-unauthorized_loader()
-
-Funzione da chiamare quando una richiesta senza JWT accede a un endpoint protetto
-
-"""

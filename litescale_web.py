@@ -27,7 +27,6 @@ def login():
         if (not user or not password):  # empty fields
             return render_template('login.html', error=True, msg='Complete all fields')
 
-        
         try:
             params = {"email": user, "password": password}
             response = requests.post(make_url('Login'), json=params)
@@ -39,6 +38,7 @@ def login():
          # -> redirect to HOME MENU'
         session['user'] = user
         session['AccessToken'] = responsej['AccessToken']
+        session['RefreshToken'] = responsej['RefreshToken']
         return redirect(url_for('home', user=user))
 
     # GET
@@ -84,6 +84,7 @@ def signUp():
 
             session['user'] = user
             session['AccessToken'] = responsej['AccessToken']
+            session['RefreshToken'] = responsej['RefreshToken']
             # -> redirect to HOME MENU'
             return redirect(url_for('home', user=user))
 
@@ -146,6 +147,8 @@ def new(user):
                     responsej = response.json()
                     response.raise_for_status()
                 except:
+                    if response.status_code == 401:
+                        return redirect("/") # need new fresh token
                     return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
                 try:
@@ -181,6 +184,16 @@ def start(user):
             project_list = response.json()
             response.raise_for_status()
         except:
+            if response.status_code == 401:
+                if 'message' in project_list and 'sub_status' in project_list['message']:
+                    status_code = project_list['message']['sub_status']
+                    if status_code == 40: # token expired
+                        result = refresh_token()
+                        if result:
+                            return redirect(request.url)
+                        else:
+                            return redirect("/")
+                return redirect("/")
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
             
         if 'Error' in project_list:
@@ -202,7 +215,11 @@ def start(user):
                      "answer_best": answer_best,
                      "answer_worst": answer_worst}
 
-            requests.post(make_url('Annotations'), json=params, headers=make_header()) # !! check error
+            try:
+                response = requests.post(make_url("Annotations"), headers=make_header(), json=params)
+                response.raise_for_status()
+            except:
+               return redirect("/") # need new fresh token
             
         # POST -> start annotation
         if request.method == 'POST':
@@ -211,28 +228,34 @@ def start(user):
             
             try:
                 response = requests.get(make_url('Projects'), params=params, headers=make_header())
-                project_dict = response.json()
+                rspj = project_dict = response.json()
                 response.raise_for_status()
-            except:
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=project_dict['message'])
-            
-            try:
+                
                 response = requests.get(make_url('Tuples'), params=params, headers=make_header())
-                tuples = response.json()
+                rspj = tuples = response.json()
                 response.raise_for_status()
-            except:
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['message'])
-            
-            if 'Error' in tuples:  # no tuple
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['Error'])
-
-            try:
+                
+                if 'Error' in tuples:  # no tuple
+                    return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['Error'])
+                
                 response = requests.get(make_url('Progress'), params=params, headers=make_header())
-                progress = response.json()
+                rspj = progress = response.json()
                 response.raise_for_status()
-            except:
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=progress['message'])
             
+            except:
+                if response.status_code == 401:
+                    if 'message' in project_list and 'sub_status' in project_list['message']:
+                        status_code = project_list['message']['sub_status']
+                        if status_code == 40: # token expired
+                            result = refresh_token()
+                            if result:
+                                return redirect(request.url)
+                            else:
+                                return redirect("/")
+                    return redirect("/")
+                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=rspj['Error'])
+            
+
             done = progress['done']
             total = progress['total']
             progress_string = 'progress: {0}/{1} {2:.1f}%'.format(
@@ -433,6 +456,16 @@ def make_header():
         return {'Authorization': 'Bearer {}'.format(session.get('AccessToken'))}
     return None
     
+def refresh_token():
+    if 'RefreshToken' in session:
+        header = {'Authorization': 'Bearer {}'.format(session.get('RefreshToken'))}
+        response = requests.post("http://localhost:5000/litescale/api/token", headers=header)
+        response_json = response.json()
+    
+        if response.status_code == 200:
+            session['AccessToken'] = response_json['AccessToken']
+            return True
+    return False
 
 
 if __name__ == '__main__':

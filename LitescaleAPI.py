@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, jwt_required, fresh_jwt_required, jwt_refresh_token_required, create_access_token, create_refresh_token, get_jwt_identity
 from webargs.flaskparser import use_args, parser
 from webargs import fields
+import datetime
 from errors import *
 from litescale import *
 import json
@@ -32,7 +33,6 @@ class LoginAPI(Resource):
 
     @use_args(user_args, location="json")
     def post(self, args):
-       
         email = args['email']
         password = args['password']
 
@@ -44,7 +44,8 @@ class LoginAPI(Resource):
         if not check_password_hash(user[0][1], password): 
             raise UnauthorizedError
 
-        token = {'AccessToken': create_access_token(identity=email),
+        expires = datetime.timedelta(seconds=10)
+        token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
                  'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
 
@@ -60,9 +61,9 @@ class RefreshTokenAPI(Resource):
     @jwt_refresh_token_required
     def post(self):
         email = get_jwt_identity()
-        new_token = create_access_token(identity=email, fresh=False)
-        
-        return {'AccessToken': new_token}
+        expires = datetime.timedelta(seconds=10)
+        token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=False)}
+        return jsonify(token)
     
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -94,11 +95,13 @@ class UsersAPI(Resource):
         if not result:
             raise EmailAlreadyExistsError
 
-        token = {'AccessToken': create_access_token(identity=email)}
+        expires = datetime.timedelta(seconds=10)
+        token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
+                 'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
 
     # Delete user
-    @jwt_required
+    @fresh_jwt_required
     def delete(self):
         email = get_jwt_identity()
 
@@ -177,7 +180,7 @@ class ProjectsAPI(Resource):
         return project_dict
 
     # Delete project
-    @jwt_required
+    @fresh_jwt_required
     @use_args({"project_id": fields.Int(required=True)}, location="query")
     def delete(self, args):
         email = get_jwt_identity()
@@ -197,7 +200,7 @@ class ProjectsAPI(Resource):
 
     
     # Create a new project
-    @jwt_required
+    @fresh_jwt_required
     @use_args({"file": fields.Field(required=True)}, location="files")
     def post(self, files):  
         email = get_jwt_identity()
@@ -292,7 +295,7 @@ class AnnotationsAPI(Resource):
     }
 
     # Add annotation into db
-    @jwt_required
+    @fresh_jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
         email = get_jwt_identity()
@@ -318,8 +321,8 @@ class GoldAPI(Resource):
     def __init__(self):
         super(GoldAPI, self).__init__()
 
-    # Add annotation into db
-    @jwt_required
+    
+    @fresh_jwt_required
     @use_args({"project_id": fields.Int(required=True)}, location="query")
     def get(self, args):
         email = get_jwt_identity()
@@ -383,7 +386,7 @@ class AuthorizationAPI(Resource):
     }
 
     # Add authorization
-    @jwt_required
+    @fresh_jwt_required
     @use_args(user_args, location="json")
     def post(self, args):
         email = get_jwt_identity()
@@ -417,5 +420,23 @@ api.add_resource(RefreshTokenAPI, '/litescale/api/token', endpoint='refresh')
 
 
 
+
+@jwt.expired_token_loader
+def expired_token_callback(expired_token):
+    response = {"message": "Token has expired", "sub_status": 40} # token expired
+    abort(401, description=response)
+   
+@jwt.needs_fresh_token_loader
+def needs_fresh_token_callback(expired_token):
+    response = {"message": "Needs a fresh token", "sub_status": 41} #  fresh token expired
+    abort(401, description=response)
+   
+@jwt.invalid_token_loader
+def invalid_token_callback(expired_token):
+    response = {"message": "Invalid token", "sub_status": 42} # invalid token
+    abort(401, description=response)
+      
+
+   
 if __name__ == '__main__':
     app.run(debug=True)
