@@ -131,35 +131,29 @@ def new(user):
             if (project_name and phenomenon and instance_file):
                 instance_file.save(instance_file.filename)
 
-                query = {'project_name': project_name,
+                params = {'project_name': project_name,
                          'phenomenon': phenomenon,
                          'tuple_size': tuple_size,
                          'replication': replication }
                 
                 files = {
-                    'json': (None, json.dumps(query), 'application/json'),
+                    'json': (None, json.dumps(params), 'application/json'),
                     'file': (os.path.basename(instance_file.filename), open(instance_file.filename, 'rb'), 'application/octet-stream')
                 }
-
-                response = make_request('Projects','post',query,files)
+                
+                try:
+                    response = requests.post(make_url("Projects"), headers=make_header(), files=files, json=params)
+                    responsej = response.json()
+                    response.raise_for_status()
+                except:
+                    return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
                 try:
                     os.remove(instance_file.filename)
                 except:
                     pass
 
-                if response.status_code == 401:
-                    if not refresh_token():
-                        return redirect("/")
-                    else:
-                        return redirect(request.url)
-                
-                response_json = response.json()
-
-                if not response or response.status_code > 399:
-                    return render_template('new.html',  user=user, rep=True, msg=response_json['message'])
-
-                if 'result' in response_json and response_json['result'] == 'True':
+                if 'result' in responsej and responsej['result'] == 'True':
                     # -> PROJECT CREATED
                     return render_template('new.html',  user=user, rep=True, msg="Project created")
 
@@ -180,20 +174,15 @@ def new(user):
 def start(user):
     if session.get('user') == user:
 
-        type_list = {"type": "authorized"}
-        response = make_request('ProjectList', 'get', type_list)
+        params = {"type": "authorized"}
         
-        if response.status_code == 401:
-            if not refresh_token():
-                return redirect("/")
-            else:
-                return redirect(request.url)
-        
-        project_list = response.json()
-
-        if not response or response.status_code > 399:
+        try:
+            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+            project_list = response.json()
+            response.raise_for_status()
+        except:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
-        
+            
         if 'Error' in project_list:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
 
@@ -208,67 +197,42 @@ def start(user):
             answer_worst = details['worst']
 
             # annotate
-            query = {"project_id": project_id,
+            params = {"project_id": project_id,
                      "tup_id": tup_id,
                      "answer_best": answer_best,
                      "answer_worst": answer_worst}
 
-            response = make_request('Annotations', 'post', query)
+            requests.post(make_url('Annotations'), json=params, headers=make_header()) # !! check error
             
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-
         # POST -> start annotation
         if request.method == 'POST':
             project_id = request.form['project_id']
             params = {"project_id": project_id}
             
-            response = make_request('Projects','get',params)
+            try:
+                response = requests.get(make_url('Projects'), params=params, headers=make_header())
+                project_dict = response.json()
+                response.raise_for_status()
+            except:
+                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=project_dict['message'])
             
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-                
-            project_dict = response.json()
-
-            if not response or response.status_code > 399:
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=response_json['message'])
-
-            response = make_request('Tuples','get',params)
+            try:
+                response = requests.get(make_url('Tuples'), params=params, headers=make_header())
+                tuples = response.json()
+                response.raise_for_status()
+            except:
+                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['message'])
             
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-                
-            tuples = response.json()
-
-            if not response or response.status_code > 399:
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=response_json['message'])
-
             if 'Error' in tuples:  # no tuple
                 return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['Error'])
 
-            # progress
-            response = make_request('Progress','get',params)
-            
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-                
-            progress = response.json()
-
-            if not response or response.status_code > 399:
+            try:
+                response = requests.get(make_url('Progress'), params=params, headers=make_header())
+                progress = response.json()
+                response.raise_for_status()
+            except:
                 return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=progress['message'])
-
+            
             done = progress['done']
             total = progress['total']
             progress_string = 'progress: {0}/{1} {2:.1f}%'.format(
@@ -292,41 +256,30 @@ def start(user):
 def gold(user):
     if session.get('user') == user:
         
-        type_list = {"type": "authorized"}
-        response = make_request('ProjectList','get', type_list)
+        params = {"type": "authorized"}
         
-        if response.status_code == 401:
-            if not refresh_token():
-                return redirect("/")
-            else:
-                return redirect(request.url)
-        
-        project_list = response.json()
-        
-        if not response or response.status_code > 399:
-            return render_template('projects.html', user=user, action='gold', rep=True, msg=response['message'])
-        
+        try:
+            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+            project_list = response.json()
+            response.raise_for_status()
+        except:
+            return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
+            
         if 'Error' in project_list:
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['Error'])
-
 
         # POST
         if request.method == 'POST':
             project_id = request.form['project_id']
-
             params = {'project_id': project_id}
-            response = make_request('Gold','get',params)
             
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-
-            if not response or response.status_code > 399:
-                response = response.json()
-                return render_template('projects.html', user=user, action='gold', project_list=project_list, rep=True, msg=response['message'])
-
+            try:
+                response = requests.get(make_url('Gold'), params=params, headers=make_header())
+                response.raise_for_status()
+            except:
+                responsej = response.json()
+                return render_template('projects.html', user=user, action='gold', project_list=project_list, rep=True, msg=responsej['message'])
+         
             file = open("static/gold.tsv", 'wb')
             file.write(response.content)
             file.close
@@ -348,23 +301,17 @@ def gold(user):
 def delete(user):
     if session.get('user') == user:
         
-        type_list = {"type": "owner"}
-        response = make_request('ProjectList','get',type_list)
+        params = {"type": "owner"}
         
-        if response.status_code == 401:
-            if not refresh_token():
-                return redirect("/")
-            else:
-                return redirect(request.url)
-        
-        project_list = response.json()
-        
-        if not response or response.status_code > 399:
-            return render_template('projects.html', user=user, action='delete', rep=True, msg=response['message'])
-        
+        try:
+            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+            project_list = response.json()
+            response.raise_for_status()
+        except:
+            return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
+         
         if 'Error' in project_list:
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
-
 
         # POST
         if request.method == 'POST':
@@ -372,38 +319,28 @@ def delete(user):
 
             params = {"project_id": project_id}
             
-            response = make_request('Projects','delete',params)
-        
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
-            
-            response_json = response.json()
-
-            if not response or response.status_code > 399:
-                return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg=response_json['message'])
-
+            try:
+                response = requests.delete(make_url('Projects'), params=params, headers=make_header())
+                responsej = response.json()
+                response.raise_for_status()
+            except:
+                return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg=responsej['message'])
+     
             # -> PROJECT DELETED
-            if 'result' in response_json and response_json['result'] == 'True':
-                response = make_request('ProjectList','get',type_list)
-                
-                if response.status_code == 401:
-                    if not refresh_token():
-                        return redirect("/")
-                    else:
-                        return redirect(request.url)
-                
-                project_list = response.json()
+            if 'result' in responsej and responsej['result'] == 'True':
+                params = {"type": "owner"}
         
-                if not response or response.status_code > 399:
-                    return render_template('projects.html', user=user, action='delete', rep=True, msg=response['message'])
+                try:
+                    response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+                    project_list = response.json()
+                    response.raise_for_status()
+                except:
+                    return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
             
                 if 'Error' in project_list:
                     return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
 
-                    return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg="Project deleted")
+                return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg="Project deleted")
 
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=project_list)
@@ -420,21 +357,15 @@ def delete(user):
 def authorization(user):
     if session.get('user') == user:
         
-        type_list = {"type": "owner"}
+        params = {"type": "owner"}
         
-        response = make_request('ProjectList','get',type_list)
-        
-        if response.status_code == 401:
-            if not refresh_token():
-                return redirect("/")
-            else:
-                return redirect(request.url)
-        
-        project_list = response.json()
-        
-        if not response or response.status_code > 399:
-            return render_template('projects.html', user=user, action='authorization', rep=True, msg=response['message'])
-        
+        try:
+            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+            project_list = response.json()
+            response.raise_for_status()
+        except:
+            return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
+          
         if 'Error' in project_list:
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['Error'])
 
@@ -447,21 +378,16 @@ def authorization(user):
             if (not project_id or not user_to):  # empty fields
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
 
-            query = {"project_id": project_id, "user_to": user_to}
-            response = make_request('Authorizations','post',query)
-        
-            if response.status_code == 401:
-                if not refresh_token():
-                    return redirect("/")
-                else:
-                    return redirect(request.url)
+            params = {"project_id": project_id, "user_to": user_to}
             
-            response_json = response.json()
-
-            if not response or response.status_code > 399:
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=response_json['message'], project_list=project_list)
-
-            if 'result' in response_json and response_json['result'] == 'True':
+            try:
+                response = requests.post(make_url('Authorization'), json=params, headers=make_header())
+                responsej = response.json()
+                response.raise_for_status()
+            except:
+                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list)
+            
+            if 'result' in responsej and responsej['result'] == 'True':
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list)
 
         # GET
@@ -478,7 +404,7 @@ def authorization(user):
 def delete_account(user):
     if session.get('user') == user:
         # delete account
-        response = make_request('Users','delete')
+        requests.delete(make_url('Users'), headers=make_header()) # !! check
         return redirect('/')
     else:
         return redirect('/')
@@ -497,9 +423,9 @@ def make_url(resource):
     elif resource == 'Annotations': url = "http://localhost:5000/litescale/api/annotations"
     elif resource == 'Gold': url = "http://localhost:5000/litescale/api/gold"
     elif resource == 'Progress': url = "http://localhost:5000/litescale/api/progress"
-    elif resource == 'Auhtorization': url = "http://localhost:5000/litescale/api/auhtorizations"
-    
-    return url;
+    elif resource == 'Authorization': url = "http://localhost:5000/litescale/api/authorizations"
+
+    return url
     
 
 def make_header():

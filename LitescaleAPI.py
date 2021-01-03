@@ -333,7 +333,7 @@ class GoldAPI(Resource):
         rst, file = generate_gold(project_id)
 
         if not rst:
-            raise InternalServerError
+            raise EmptyAnnotationsError
 
         response = make_response(file)
         response.headers['content-type'] = 'application/octet-stream'
@@ -412,7 +412,7 @@ api.add_resource(TuplesAPI, '/litescale/api/tuples', endpoint='tuples')
 api.add_resource(AnnotationsAPI, '/litescale/api/annotations', endpoint='annotation')
 api.add_resource(GoldAPI, '/litescale/api/gold', endpoint='gold')
 api.add_resource(ProgressAPI, '/litescale/api/progress', endpoint='progress')
-api.add_resource(AuthorizationAPI, '/litescale/api/auhtorizations', endpoint='authorization')
+api.add_resource(AuthorizationAPI, '/litescale/api/authorizations', endpoint='authorization')
 api.add_resource(RefreshTokenAPI, '/litescale/api/token', endpoint='refresh')
 
 
