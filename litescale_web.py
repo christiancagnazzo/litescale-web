@@ -486,11 +486,6 @@ def delete_account(user):
 
 # ---------------------------------------------------------------------------------------------------- #
 
-@app.route('/<user>/confirm')
-def confirm(user):
-    if request.method == "POST":
-        x = request
-        return redirect(request.url, code=307)
 
 # Auxiliar functions to make a url and header request
 
@@ -512,6 +507,7 @@ def make_header():
     if 'AccessToken' in session:
         return {'Authorization': 'Bearer {}'.format(session.get('AccessToken'))}
     return None
+
     
 def refresh_token():
     if 'RefreshToken' in session:
