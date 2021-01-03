@@ -44,7 +44,7 @@ class LoginAPI(Resource):
         if not check_password_hash(user[0][1], password): 
             raise UnauthorizedError
 
-        expires = datetime.timedelta(seconds=10)
+        expires = datetime.timedelta(minutes=30)
         token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
                  'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
@@ -61,7 +61,7 @@ class RefreshTokenAPI(Resource):
     @jwt_refresh_token_required
     def post(self):
         email = get_jwt_identity()
-        expires = datetime.timedelta(seconds=10)
+        expires = datetime.timedelta(minutes=30)
         token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=False)}
         return jsonify(token)
     
@@ -95,7 +95,7 @@ class UsersAPI(Resource):
         if not result:
             raise EmailAlreadyExistsError
 
-        expires = datetime.timedelta(seconds=10)
+        expires = datetime.timedelta(minutes=30)
         token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
                  'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
@@ -419,7 +419,7 @@ api.add_resource(AuthorizationAPI, '/litescale/api/authorizations', endpoint='au
 api.add_resource(RefreshTokenAPI, '/litescale/api/token', endpoint='refresh')
 
 
-
+# Function to handle auhtorization errors
 
 @jwt.expired_token_loader
 def expired_token_callback(expired_token):
@@ -427,12 +427,12 @@ def expired_token_callback(expired_token):
     abort(401, description=response)
    
 @jwt.needs_fresh_token_loader
-def needs_fresh_token_callback(expired_token):
+def needs_fresh_token_callback():
     response = {"message": "Needs a fresh token", "sub_status": 41} #  fresh token expired
     abort(401, description=response)
    
 @jwt.invalid_token_loader
-def invalid_token_callback(expired_token):
+def invalid_token_callback():
     response = {"message": "Invalid token", "sub_status": 42} # invalid token
     abort(401, description=response)
       

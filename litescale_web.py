@@ -177,6 +177,7 @@ def new(user):
 def start(user):
     if session.get('user') == user:
 
+        
         params = {"type": "authorized"}
         
         try:
@@ -190,7 +191,8 @@ def start(user):
                     if status_code == 40: # token expired
                         result = refresh_token()
                         if result:
-                            return redirect(request.url)
+                            return render_template("confirm.html", user=user)
+                            return redirect(request.url, code=307)
                         else:
                             return redirect("/")
                 return redirect("/")
@@ -198,7 +200,7 @@ def start(user):
             
         if 'Error' in project_list:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
-
+    
         # POST -> save annotation into db
         if request.method == 'POST' and 'tup_id' in request.form:
             project_id = request.form['project_id']
@@ -249,7 +251,7 @@ def start(user):
                         if status_code == 40: # token expired
                             result = refresh_token()
                             if result:
-                                return redirect(request.url)
+                                return redirect(request.url, code=307)
                             else:
                                 return redirect("/")
                     return redirect("/")
@@ -263,9 +265,10 @@ def start(user):
 
             # tuple
             return render_template('annotation.html', project_id=project_id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tuples['tup_id'], tup=tuples['tup'], progress=progress_string)
-
+        
         # GET -> project list
         return render_template('projects.html', user=user, action='start', project_list=project_list)
+        
     else:
         return redirect('/')
 
@@ -286,6 +289,16 @@ def gold(user):
             project_list = response.json()
             response.raise_for_status()
         except:
+            if response.status_code == 401:
+                if 'message' in project_list and 'sub_status' in project_list['message']:
+                    status_code = project_list['message']['sub_status']
+                    if status_code == 40: # token expired
+                        result = refresh_token()
+                        if result:
+                            return redirect(request.url, code=307)
+                        else:
+                            return redirect("/")
+                return redirect("/")
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
             
         if 'Error' in project_list:
@@ -300,6 +313,8 @@ def gold(user):
                 response = requests.get(make_url('Gold'), params=params, headers=make_header())
                 response.raise_for_status()
             except:
+                if response.status_code == 401:
+                    return redirect("/")
                 responsej = response.json()
                 return render_template('projects.html', user=user, action='gold', project_list=project_list, rep=True, msg=responsej['message'])
          
@@ -331,6 +346,16 @@ def delete(user):
             project_list = response.json()
             response.raise_for_status()
         except:
+            if response.status_code == 401:
+                if 'message' in project_list and 'sub_status' in project_list['message']:
+                    status_code = project_list['message']['sub_status']
+                    if status_code == 40: # token expired
+                        result = refresh_token()
+                        if result:
+                            return redirect(request.url, code=307)
+                        else:
+                            return redirect("/")
+                return redirect("/")
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
          
         if 'Error' in project_list:
@@ -347,6 +372,8 @@ def delete(user):
                 responsej = response.json()
                 response.raise_for_status()
             except:
+                if response.status_code == 401:
+                    return redirect("/")
                 return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg=responsej['message'])
      
             # -> PROJECT DELETED
@@ -358,6 +385,16 @@ def delete(user):
                     project_list = response.json()
                     response.raise_for_status()
                 except:
+                    if response.status_code == 401:
+                        if 'message' in project_list and 'sub_status' in project_list['message']:
+                            status_code = project_list['message']['sub_status']
+                            if status_code == 40: # token expired
+                                result = refresh_token()
+                                if result:
+                                    return redirect(request.url, code=307)
+                                else:
+                                    return redirect("/")
+                        return redirect("/")
                     return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
             
                 if 'Error' in project_list:
@@ -387,6 +424,16 @@ def authorization(user):
             project_list = response.json()
             response.raise_for_status()
         except:
+            if response.status_code == 401:
+                if 'message' in project_list and 'sub_status' in project_list['message']:
+                    status_code = project_list['message']['sub_status']
+                    if status_code == 40: # token expired
+                        result = refresh_token()
+                        if result:
+                            return redirect(request.url, code=307)
+                        else:
+                            return redirect("/")
+                return redirect("/")
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
           
         if 'Error' in project_list:
@@ -408,6 +455,8 @@ def authorization(user):
                 responsej = response.json()
                 response.raise_for_status()
             except:
+                if response.status_code == 401:
+                    return redirect("/")
                 return render_template('authorization.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
@@ -426,14 +475,22 @@ def authorization(user):
 @app.route('/<user>/delete_account')
 def delete_account(user):
     if session.get('user') == user:
-        # delete account
-        requests.delete(make_url('Users'), headers=make_header()) # !! check
-        return redirect('/')
+        try:
+            response = requests.delete(make_url('Users'), headers=make_header())
+            response.raise_for_status()
+            return redirect("/")
+        except:
+            return render_template("home.html")
     else:
         return redirect('/')
 
 # ---------------------------------------------------------------------------------------------------- #
 
+@app.route('/<user>/confirm')
+def confirm(user):
+    if request.method == "POST":
+        x = request
+        return redirect(request.url, code=307)
 
 # Auxiliar functions to make a url and header request
 
