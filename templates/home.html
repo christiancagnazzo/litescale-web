@@ -6,7 +6,7 @@
 </header>
 
 <!-- First Grid -->
-<div class="w3-row-padding w3-padding-64 w3-container">
+<div class="w3-row-padding w3-padding-64 w3-container w3-white">
   <div class="w3-content">
     <div class="w3-twothird">
       <h1>Start to annotate your project with the BWS method</h1>
@@ -30,7 +30,7 @@
 </div>
 
 <!-- Second Grid -->
-<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
+<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container w3-grey">
   <div class="w3-content">
     <div class="w3-third w3-center">
       <i class="fa fa-book w3-padding-64 w3-text-green w3-margin-right"></i>
@@ -69,11 +69,21 @@ function delete_account(){
 window.onload = function(){
   $("#out").hide();
   $("#in").hide();
+  $("#start").hide();
+  $("#new").hide();
+  $("#gold").hide();
+  $("#del").hide();
+  $("#auth").hide();
   document.getElementById("bar").classList.add("w3-green");
   document.getElementById("home").classList.add("w3-white");
   if ("{{user}}"){
     document.getElementById("us").innerHTML = "{{user}}";
     $("#out").show();
+    $("#start").show();
+    $("#new").show();
+    $("#gold").show();
+    $("#del").show();
+    $("#auth").show();
   } else {
     $("#in").show();
   }

@@ -5,6 +5,7 @@
   <h1 class="w3-margin">Create a new project</h1>
 </header>
 
+
 <div class="w3-container" style="width:35%; margin: 0 auto;">
     <form style="text-align:left; padding:30px;"class="w3-container" name="new" action="" method="post" enctype="multipart/form-data">
         <label class="w3-text-purple">Project name</label>
@@ -43,27 +44,22 @@
 
         <div class="create">
         <input id="create" type="submit" value="Create"/>
-        <div>
+        </div>
     </form>
 </div>
 
 
-{% if rep==True %}
-    <p id="msg"> {{ msg }} <p>
-{% endif%}
+<div class="w3-center w3-text-red w3-margin w3-xlarge">
+    <p id="msg"> {{ msg }}<p>
+</div>
 {% include 'footer.html' %}
 
 <script>
 window.onload = function(){
-  $("#out").hide();
-  $("#in").hide();
-  document.getElementById("bar").classList.add("w3-deep-purple");
-  document.getElementById("new").classList.add("w3-white");
-  if ("{{user}}"){
-    document.getElementById("us").innerHTML = "{{user}}";
-    $("#out").show();
-  } else {
-    $("#in").show();
-  }
+    $("#in").hide();
+    $("#authorization").hide();
+    document.getElementById("bar").classList.add("w3-deep-purple");
+    document.getElementById("new").classList.add("w3-white");
+    document.getElementById("us").innerHTML = "{{user}}";    
 }
 </script>

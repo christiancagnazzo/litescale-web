@@ -151,7 +151,7 @@ def new():
                     response.raise_for_status()
                 except:
                     if response.status_code == 401:
-                        return redirect("login") # need new fresh token
+                        return render_template('login.html', error=True, msg="Session expired. Re-login, please") # need new fresh token
                     return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
                 try:
@@ -182,26 +182,15 @@ def start():
         user = session.get('user')
         params = {"type": "authorized"}
         
-        try:
-            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
-            project_list = response.json()
-            response.raise_for_status()
-        except:
-            if response.status_code == 401:
-                if 'message' in project_list and 'sub_status' in project_list['message']:
-                    status_code = project_list['message']['sub_status']
-                    if status_code == 40: # token expired
-                        result = refresh_token()
-                        if result:
-                            return redirect(request.url, code=307)
-                        else:
-                            return redirect("login")
-                return redirect("login")
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+        elif not rst:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
-            
-        if 'Error' in project_list:
+        elif 'Error' in project_list:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
-    
+        
         # POST -> save annotation into db
         if request.method == 'POST' and 'tup_id' in request.form:
             project_id = request.form['project_id']
@@ -221,8 +210,9 @@ def start():
             try:
                 response = requests.post(make_url("Annotations"), headers=make_header(), json=params)
                 response.raise_for_status()
-            except:
-               return redirect("login") # need new fresh token
+            except:  # need new fresh token
+               return render_template('login.html', error=True, msg="Session expired. Re-login, please") 
+               return render_template('login.html', error=True, msg="Session expired. Re-login, please")
             
         # POST -> start annotation
         if request.method == 'POST':
@@ -239,7 +229,7 @@ def start():
                 response.raise_for_status()
                 
                 if 'Error' in tuples:  # no tuple
-                    return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=tuples['Error'])
+                    return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list ,rep=True, msg=tuples['Error'])
                 
                 response = requests.get(make_url('Progress'), params=params, headers=make_header())
                 rspj = progress = response.json()
@@ -254,21 +244,21 @@ def start():
                             if result:
                                 return redirect(request.url, code=307)
                             else:
-                                return redirect("login")
-                    return redirect("login")
-                return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=rspj['Error'])
+                                return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list, rep=True, msg=rspj['Error'])
             
 
             done = progress['done']
             total = progress['total']
-            progress_string = 'progress: {0}/{1} {2:.1f}%'.format(
+            progress_string = 'Progress: {0}/{1} {2:.1f}%'.format(
                 done, total, 100.0*(done/total))
 
             # tuple
             return render_template('annotation.html', project_id=project_id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tuples['tup_id'], tup=tuples['tup'], progress=progress_string)
         
         # GET -> project list
-        return render_template('projects.html', user=user, action='start', project_list=project_list)
+        return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list)
         
     else:
         return redirect('login')
@@ -286,26 +276,15 @@ def gold():
         
         params = {"type": "authorized"}
         
-        try:
-            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
-            project_list = response.json()
-            response.raise_for_status()
-        except:
-            if response.status_code == 401:
-                if 'message' in project_list and 'sub_status' in project_list['message']:
-                    status_code = project_list['message']['sub_status']
-                    if status_code == 40: # token expired
-                        result = refresh_token()
-                        if result:
-                            return redirect(request.url, code=307)
-                        else:
-                            return redirect("login")
-                return redirect("login")
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+        elif not rst:
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
-            
-        if 'Error' in project_list:
+        elif 'Error' in project_list:
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['Error'])
-
+        
         # POST
         if request.method == 'POST':
             project_id = request.form['project_id']
@@ -316,9 +295,9 @@ def gold():
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("login")
+                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
                 responsej = response.json()
-                return render_template('projects.html', user=user, action='gold', project_list=project_list, rep=True, msg=responsej['message'])
+                return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
          
             file = open("static/gold.tsv", 'wb')
             file.write(response.content)
@@ -327,7 +306,7 @@ def gold():
             return redirect(url_for('static', filename='gold.tsv'))
 
         # GET
-        return render_template('projects.html', user=user, action='gold', project_list=project_list)
+        return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list)
     else:
         return redirect('login')
 
@@ -344,26 +323,15 @@ def delete():
         
         params = {"type": "owner"}
         
-        try:
-            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
-            project_list = response.json()
-            response.raise_for_status()
-        except:
-            if response.status_code == 401:
-                if 'message' in project_list and 'sub_status' in project_list['message']:
-                    status_code = project_list['message']['sub_status']
-                    if status_code == 40: # token expired
-                        result = refresh_token()
-                        if result:
-                            return redirect(request.url, code=307)
-                        else:
-                            return redirect("login")
-                return redirect("login")
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+        elif not rst:
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
-         
-        if 'Error' in project_list:
+        elif 'Error' in project_list:
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
-
+        
         # POST
         if request.method == 'POST':
             project_id = request.form['project_id']
@@ -376,37 +344,26 @@ def delete():
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("login")
-                return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg=responsej['message'])
+                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
      
             # -> PROJECT DELETED
             if 'result' in responsej and responsej['result'] == 'True':
                 params = {"type": "owner"}
+                
+                rst, project_list, progress_list = get_project_list(params)
         
-                try:
-                    response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
-                    project_list = response.json()
-                    response.raise_for_status()
-                except:
-                    if response.status_code == 401:
-                        if 'message' in project_list and 'sub_status' in project_list['message']:
-                            status_code = project_list['message']['sub_status']
-                            if status_code == 40: # token expired
-                                result = refresh_token()
-                                if result:
-                                    return redirect(request.url, code=307)
-                                else:
-                                    return redirect("login")
-                        return redirect("login")
-                    return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
-            
-                if 'Error' in project_list:
+                if rst is None: 
+                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                elif not rst:
+                    return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
+                elif 'Error' in project_list:
                     return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
-
-                return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg="Project deleted")
-
+                
+            return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg="Project deleted")
+        
         # project list
-        return render_template('projects.html', user=user, action='delete', project_list=project_list)
+        return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list)
     else:
         return redirect('login')
 
@@ -423,26 +380,15 @@ def authorization():
         
         params = {"type": "owner"}
         
-        try:
-            response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
-            project_list = response.json()
-            response.raise_for_status()
-        except:
-            if response.status_code == 401:
-                if 'message' in project_list and 'sub_status' in project_list['message']:
-                    status_code = project_list['message']['sub_status']
-                    if status_code == 40: # token expired
-                        result = refresh_token()
-                        if result:
-                            return redirect(request.url, code=307)
-                        else:
-                            return redirect("login")
-                return redirect("login")
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+        elif not rst:
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
-          
-        if 'Error' in project_list:
+        elif 'Error' in project_list:
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['Error'])
-
+        
         # POST
         if request.method == 'POST':
             details = request.form
@@ -450,7 +396,7 @@ def authorization():
             user_to = details['user']
 
             if (not project_id or not user_to):  # empty fields
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list, progress_list=progress_list)
 
             params = {"project_id": project_id, "user_to": user_to}
             
@@ -460,14 +406,14 @@ def authorization():
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("login")
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list)
+                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list, progress_list=progress_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list)
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list, progress_list=progress_list)
 
         # GET
-        return render_template('projects.html', user=user, action='authorization', project_list=project_list)
+        return render_template('projects.html', user=user, action='authorization', project_list=project_list, progress_list=progress_list)
     else:
         return redirect('login')
 
@@ -523,6 +469,43 @@ def refresh_token():
             session['AccessToken'] = response_json['AccessToken']
             return True
     return False
+
+
+def get_project_list(params):
+    try:
+        response = requests.get(make_url('ProjectList'), params=params, headers=make_header())
+        project_list = response.json()
+        response.raise_for_status()
+    except:
+        if response.status_code == 401:
+            if 'message' in project_list and 'sub_status' in project_list['message']:
+                status_code = project_list['message']['sub_status']
+                if status_code == 40: # token expired
+                    result = refresh_token()
+                    if result:
+                        return get_project_list(params)
+                    else:
+                        return None, None, None
+                return None, None, None
+        return False, project_list, None
+     
+    if 'Error' in project_list:
+        return True, project_list, None    
+                
+    progress_list = {}
+    for project in project_list:
+        try:
+            p_id = project['projectId']
+            params = {"project_id": p_id }
+            response = requests.get(make_url('Progress'), params=params, headers=make_header())
+            progress = response.json()
+            response.raise_for_status()
+            done = progress['done']
+            total = progress['total']
+            progress_list.update({p_id : 100.0*(done/total)})
+        except:
+            return None, None, None
+    return True, project_list, progress_list
 
 
 if __name__ == '__main__':

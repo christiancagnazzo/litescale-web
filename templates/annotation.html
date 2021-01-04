@@ -1,22 +1,10 @@
 {% include 'header.html' %}
 
-<script>
-function annotate(id) {
-    if (document.getElementById('best').value == '') {
-        document.getElementById('best').value=id;
-        document.getElementById('bestworst').textContent="LEAST";
-        document.getElementById('instance_'+id).setAttribute("disabled", "true");
-    }
-    else {
-        document.getElementById('worst').value=id;
-        document.getElementById('instance').submit();
-    }
-}
-</script>
+<!-- Header -->
+<header class="w3-container w3-teal w3-center" style="padding-top:40px">
+  <h1 class="w3-margin">Which is the <span id="bestworst">MOST</span> {{phenomenon}}?</h1>
+</header>
 
-<p>
-    Which is the <span id="bestworst">MOST</span> {{phenomenon}}?
-</p>
 
 <div id="instances">
     <form id="instance" name="instance" action="" method="post">
@@ -33,7 +21,38 @@ function annotate(id) {
 </div>
 <hr>
 
-{{progress}}<br/>
-<a href="/{{user}}/start">back</a>
+<div id="progress" class="w3-container w3-pale-green">
+{{progress}}
+</div>
 
 {% include 'footer.html' %}
+
+
+<script>
+window.onload = function(){
+  $("#out").hide();
+  $("#in").hide();
+  $("#home").hide();
+  $("#start").hide();
+  $("#new").hide();
+  $("#gold").hide();
+  $("#del").hide();
+  $("#auth").hide();
+  var a = $("<a href='/start' id='home' class='w3-bar-item w3-button w3-padding-large w3-hover-white'>< Back</a>")
+  $("#bar").append(a);
+  document.getElementById("bar").classList.add("w3-teal");
+  document.getElementById("us").innerHTML = "{{user}}";
+}
+
+function annotate(id) {
+    if (document.getElementById('best').value == '') {
+        document.getElementById('best').value=id;
+        document.getElementById('bestworst').textContent="LEAST";
+        document.getElementById('instance_'+id).setAttribute("disabled", "true");
+    }
+    else {
+        document.getElementById('worst').value=id;
+        document.getElementById('instance').submit();
+    }
+}
+</script>

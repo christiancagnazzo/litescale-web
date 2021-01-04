@@ -6,13 +6,15 @@
 </header>
 
 <div class="w3-container">
-    <table style="margin-top: 30px; border-color: red;" class="w3-table w3-hoverable w3-large w3-card-4">    
+    <p id="p" class="w3-xlarge w3-center w3-margin"></p>
+    <table style="margin-top: 30px" class="w3-table w3-hoverable w3-large w3-card-4">    
         <thead>
             <tr class="w3-light-grey">
                 <th>Project Name</th>
                 <th>Phenomenon</th>
                 <th>Tuple Size</th>
                 <th>Replication instances</th>
+                <th>Progress</th>
                 <th>Project Owner</th>
             </tr>
         </thead>
@@ -23,6 +25,7 @@
             <td>{{project['phenomenon']}}</td>
             <td>{{project['tuplesize']}}</td>
             <td>{{project['replicate']}}</td>
+            <td>{{progress_list[project['projectId']]}}%</td>
             <td>{{project['projectOwner']}}</td>
         </tr>    
         {% endfor %}
@@ -35,14 +38,13 @@
 </div>
 
 <form style="margin-top: 60px; text-align:center; font-size:25px;" id="authorization" name="authorization" action="" method="post">
-    User to authorize <input id="user" name="user"/>
+    User to be authorized <input id="user" name="user"/>
     <input id="project_id_a" name="project_id" type="hidden" value=""><br><br>
-<form>
+</form>
 
-{% if rep==True %}
-    <p> {{ msg }} <p>
-{% endif%}
-<hr>
+<div class="w3-center w3-text-red w3-margin w3-xlarge">    
+    <p id="msg"> {{ msg }}</p>
+</div>
 {% include 'footer.html' %}
 
 
@@ -52,13 +54,18 @@ window.onload = function(){
         $("#authorization").hide();
         document.getElementById("us").innerHTML = "{{user}}";
         if ("{{action}}" == "start"){
+            $("#p").text("Click the project you want to annotate");
+            $("#p").addClass("w3-text-teal");
             document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
-            document.getElementById("bar").classList.add("w3-blue");
+            document.getElementById("bar").classList.add("w3-teal");
             document.getElementById("start").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-blue");
-            $(".el").addClass("w3-hover-blue w3-pale-blue");
+            document.getElementById("head").classList.add("w3-teal");
+            $(".el").addClass("w3-hover-teal");
+            $(".el").css("background-color","#c6ebd9");
         }
         else if ("{{action}}" == "gold"){
+            $("#p").text("Click the project of which you want to generate the gold file");
+            $("#p").addClass("w3-text-deep-orange");
             document.getElementById("title").innerHTML = "Generate the gold standard file of a project";
             document.getElementById("bar").classList.add("w3-deep-orange");
             document.getElementById("gold").classList.add("w3-white");
@@ -67,6 +74,8 @@ window.onload = function(){
             $(".el").css("background-color","#ffe0cc");
         }
         else if ("{{action}}" == "delete"){
+            $("#p").text("Click the project you want to delete");
+            $("#p").addClass("w3-text-red");
             document.getElementById("title").innerHTML = "Delete a your project"; 
             document.getElementById("bar").classList.add("w3-red");
             document.getElementById("del").classList.add("w3-white");
@@ -74,13 +83,14 @@ window.onload = function(){
             $(".el").addClass("w3-hover-red w3-pale-red");
         }
         else if ("{{action}}" == "authorization"){
+            $("#p").text("Enter the user you want to authorize in the field and then click the desired project");
+            $("#p").addClass("w3-text-blue");
             $("#authorization").show();
             document.getElementById("title").innerHTML = "Authorize a user to annotate your project"; 
-            document.getElementById("bar").classList.add("w3-teal");
-            document.getElementById("gold").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-teal");
-            $(".el").addClass("w3-hover-teal");
-            $(".el").css("background-color","#c6ebd9");
+            document.getElementById("bar").classList.add("w3-blue");
+            document.getElementById("auth").classList.add("w3-white");
+            document.getElementById("head").classList.add("w3-blue");
+            $(".el").addClass("w3-hover-blue w3-pale-blue");
         }
 }
 
