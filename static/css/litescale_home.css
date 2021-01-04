@@ -9,3 +9,27 @@ h1 {
 .w3-bar,h1,button {
     font-family: "Montserrat", sans-serif;
 }
+
+form label {
+    font-size: 22px !important;
+}
+
+#create {
+    border-radius: 10px;
+    font-size: 20px;
+    padding: 4px;
+    background-color: purple;
+    cursor: pointer;
+    color: white;
+}
+
+.create {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 35px;
+}
+
+form select {
+    display: block;
+}

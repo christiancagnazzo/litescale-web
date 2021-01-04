@@ -1,41 +1,69 @@
 {% include 'header.html' %}
 
-<h1>Create project</h1>
-<form name="new" action="" method="post" enctype="multipart/form-data">
-<label for="project_name">Project name</label>
-<input name="project_name" type="text" /><br/>
-<label for="phenomenon">Phenomenon (e.g., offensive, positive)</label>
-<input name="phenomenon" type="text" /><br/>
-<label for="tuple_size">Dimension of the tuples</label>
-<select name="tuple_size">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4" selected="selected">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-</select><br/>
-<label for="replication">Replication of the instances</label>
-<select name="replication">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4" selected="selected">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-</select><br/>
-<label for="instance_file">Read instances from tab-separated file</label>
-<input type="file" name="instance_file" /><br><br>
-<input type="submit" value="create project"/>
-</form>
+<!-- Header -->
+<header class="w3-container w3-deep-purple w3-center" style="padding-top:40px">
+  <h1 class="w3-margin">Create a new project</h1>
+</header>
+
+<div class="w3-container" style="width:35%; margin: 0 auto;">
+    <form style="text-align:left; padding:30px;"class="w3-container" name="new" action="" method="post" enctype="multipart/form-data">
+        <label class="w3-text-purple">Project name</label>
+        <input class="w3-input w3-border w3-light-grey" name="project_name" type="text" size="40"/><br/>
+        <label class="w3-text-purple">Phenomenon (e.g., offensive, positive)</label>
+        <input class="w3-input w3-border w3-light-grey" name="phenomenon" type="text" /><br/>
+    
+        <label class="w3-text-purple">Dimension of the tuples</label>
+        <select class="w3-select" name="tuple_size">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected="selected">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select><br/>
+
+        <label class="w3-text-purple">Replication of the instances</label>
+        <select class="w3-select" name="replication">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected="selected">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select><br/>
+        
+        <label class="w3-text-purple">Read instances from tab-separated file</label>
+        <input type="file" name="instance_file" /><br>
+
+        <div class="create">
+        <input id="create" type="submit" value="Create"/>
+        <div>
+    </form>
+</div>
+
+
 {% if rep==True %}
     <p id="msg"> {{ msg }} <p>
 {% endif%}
-<a href="/{{user}}/home">back</a>
 {% include 'footer.html' %}
+
+<script>
+window.onload = function(){
+  $("#out").hide();
+  $("#in").hide();
+  document.getElementById("bar").classList.add("w3-deep-purple");
+  document.getElementById("new").classList.add("w3-white");
+  if ("{{user}}"){
+    document.getElementById("us").innerHTML = "{{user}}";
+    $("#out").show();
+  } else {
+    $("#in").show();
+  }
+}
+</script>
