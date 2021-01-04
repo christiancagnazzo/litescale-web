@@ -1,8 +1,8 @@
 {% include 'header.html' %}
 
 <!-- Header -->
-<header class="w3-container w3-green w3-center" style="padding-top:35px">
-  <h1 class="w3-margin w3-jumbo">Welcome to LITESCALE</h1>
+<header class="w3-container w3-green w3-center" style="padding-top:40px">
+  <h1 class="w3-margin">Welcome to LITESCALE</h1>
 </header>
 
 <!-- First Grid -->
@@ -55,29 +55,7 @@
 </div>
 
 <!--
-<div>
-    <div>
-        <div>
-            <span><a href="/{{user}}/start">Start or continue to annotate yours projects</a><span>
-        </div>
-        <div>
-            <span><a href="/{{user}}/gold">Generate the gold standard file of a project</a><span>
-        </div>
-        
-            <span><a href="/{{user}}/new">Create a new project</a><span>
-        </div>
-        <div>
-            <span><a href="/{{user}}/authorization">Give permission for your project to another user</a><span>
-        </div>
-        <div>
-            <span><a href="/{{user}}/delete">Delete a your project (All annotations made will be deleted)</a><span>
-        </div>
-        <div>
-            <span><p onclick="delete_account()">Delete your account</p><span>
-        </div>
-    </div>
-</div>
-
+<span><p onclick="delete_account()">Delete your account</p><span>  
 <script>
 function delete_account(){
     if (confirm("Are you sure you want to delete the account?")) {
@@ -86,5 +64,20 @@ function delete_account(){
 }
 </script>
 -->
+
+<script>
+window.onload = function(){
+  $("#out").hide();
+  $("#in").hide();
+  document.getElementById("bar").classList.add("w3-green");
+  document.getElementById("home").classList.add("w3-white");
+  if ("{{user}}"){
+    document.getElementById("us").innerHTML = "{{user}}";
+    $("#out").show();
+  } else {
+    $("#in").show();
+  }
+}
+</script>
 
 {% include 'footer.html' %}

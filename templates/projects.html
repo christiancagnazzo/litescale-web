@@ -1,12 +1,99 @@
 {% include 'header.html' %}
 
+<!-- Header -->
+<header id="head" class="w3-container w3-center" style="padding-top:40px;">
+  <h1 id="title" class="w3-margin"></h1>
+</header>
+
+<div class="w3-container">
+    <table style="margin-top: 30px; border-color: red;" class="w3-table w3-hoverable w3-large w3-card-4">    
+        <thead>
+            <tr class="w3-light-grey">
+                <th>Project Name</th>
+                <th>Phenomenon</th>
+                <th>Tuple Size</th>
+                <th>Replication instances</th>
+                <th>Project Owner</th>
+            </tr>
+        </thead>
+        
+        {%for project in project_list:%}
+        <tr class="el" onclick="post_request('{{project['projectId']}}')">
+            <td>{{project['projectName']}}</td>
+            <td>{{project['phenomenon']}}</td>
+            <td>{{project['tuplesize']}}</td>
+            <td>{{project['replicate']}}</td>
+            <td>{{project['projectOwner']}}</td>
+        </tr>    
+        {% endfor %}
+
+        <form id="request_project" method="post" action="">
+            <input id="project_id" name="project_id" type="hidden" value="">
+        </form>
+
+    </table>   
+</div>
+
+<form style="margin-top: 60px; text-align:center; font-size:25px;" id="authorization" name="authorization" action="" method="post">
+    User to authorize <input id="user" name="user"/>
+    <input id="project_id_a" name="project_id" type="hidden" value=""><br><br>
+<form>
+
+{% if rep==True %}
+    <p> {{ msg }} <p>
+{% endif%}
+<hr>
+{% include 'footer.html' %}
+
+
 <script>
+window.onload = function(){
+        $("#out").hide();
+        $("#authorization").hide();
+        document.getElementById("us").innerHTML = "{{user}}";
+        if ("{{action}}" == "start"){
+            document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
+            document.getElementById("bar").classList.add("w3-blue");
+            document.getElementById("start").classList.add("w3-white");
+            document.getElementById("head").classList.add("w3-blue");
+            $(".el").addClass("w3-hover-blue w3-pale-blue");
+        }
+        else if ("{{action}}" == "gold"){
+            document.getElementById("title").innerHTML = "Generate the gold standard file of a project";
+            document.getElementById("bar").classList.add("w3-deep-orange");
+            document.getElementById("gold").classList.add("w3-white");
+            document.getElementById("head").classList.add("w3-deep-orange");
+            $(".el").addClass("w3-hover-deep-orange");
+            $(".el").css("background-color","#ffe0cc");
+        }
+        else if ("{{action}}" == "delete"){
+            document.getElementById("title").innerHTML = "Delete a your project"; 
+            document.getElementById("bar").classList.add("w3-red");
+            document.getElementById("del").classList.add("w3-white");
+            document.getElementById("head").classList.add("w3-red");
+            $(".el").addClass("w3-hover-red w3-pale-red");
+        }
+        else if ("{{action}}" == "authorization"){
+            $("#authorization").show();
+            document.getElementById("title").innerHTML = "Authorize a user to annotate your project"; 
+            document.getElementById("bar").classList.add("w3-teal");
+            document.getElementById("gold").classList.add("w3-white");
+            document.getElementById("head").classList.add("w3-teal");
+            $(".el").addClass("w3-hover-teal");
+            $(".el").css("background-color","#c6ebd9");
+        }
+}
+
 function post_request(project_id){
-    var del = document.getElementsByClassName('delete')
-    if (del.length > 0){
+    if ("{{action}}" == 'delete'){
         if (confirm("Are you sure you want to delete the project?")) {
             document.getElementById('project_id').value=project_id;
             document.getElementById('request_project').submit();
+        }
+    } else if ("{{action}}" == 'authorization'){
+        if (confirm("Are you sure you want to authorize this user?")) {
+            document.getElementById('project_id_a').value=project_id;
+            document.getElementById('authorization').submit();
         }
     }
     else {
@@ -15,39 +102,3 @@ function post_request(project_id){
     }
 }
 </script>
-
-
-
-{% if action == 'start': %}
-<h1>Start/continue project</h1>
-{% elif action == 'gold': %}
-<h1>Generate gold standard</h1>
-{% elif action == 'delete': %}
-<h1>Delete project</h1>
-{% endif %}
-
- <table>
-    <caption>Projects</caption>
-    <tr>
-        <th>Name</th>
-        <th>Owner</th>
-    </tr>
-    
-    {%for project in project_list:%}
-    <tr>
-        <td><p class="{{action}}" onclick="post_request('{{project['projectId']}}')">{{project['projectName']}}</p></td>
-        <td>{{project['projectOwner']}}</td>
-    <th>    
-    {% endfor %}
-
-    <form id="request_project" method="post" action="">
-        <input id="project_id" name="project_id" type="hidden" value="">
-    </form>
-
-</table>
-{% if rep==True %}
-    <p> {{ msg }} <p>
-{% endif%}
-<hr>
-<a href="/{{user}}/home">back</a>
-{% include 'footer.html' %}

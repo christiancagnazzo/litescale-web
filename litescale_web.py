@@ -10,7 +10,7 @@ app.secret_key = 'litescale'  # Session key
 
 @app.route('/')
 def main():
-    return redirect('login')
+    return redirect('home')
 
 
 # --------------------------------------------- LOGIN -------------------------------------------- #
@@ -39,7 +39,7 @@ def login():
         session['user'] = user
         session['AccessToken'] = responsej['AccessToken']
         session['RefreshToken'] = responsej['RefreshToken']
-        return redirect(url_for('home', user=user))
+        return redirect('home')
 
     # GET
     else:
@@ -51,10 +51,11 @@ def login():
 # ----------------------------------- LOGOUT --------------------------------------------------------- #
 
 
-@app.route('/<user>/logout')
-def logout(user):
+@app.route('/logout')
+def logout():
     session.pop('user', None)
     session.pop('AccessToken', None)
+    session.pop('RefreshToken', None)
     return redirect('/')
 
 # ---------------------------------------------------------------------------------------------------- #
@@ -86,7 +87,7 @@ def signUp():
             session['AccessToken'] = responsej['AccessToken']
             session['RefreshToken'] = responsej['RefreshToken']
             # -> redirect to HOME MENU'
-            return redirect(url_for('home', user=user))
+            return redirect('home')
 
         else:  # empty fields
             return render_template('registration.html', error=True, msg='Complete all fields')
@@ -99,12 +100,12 @@ def signUp():
 # ---------------------------------------- HOME MENU' ------------------------------------------------ #
 
 
-@app.route('/<user>/home')
-def home(user):
-    if session.get('user') == user:
-        return render_template('home.html', user=user)
+@app.route('/home')
+def home():
+    if 'user' in session:
+        return render_template('home.html', user=session.get('user'))
     else:
-        return redirect('/')
+        return render_template('home.html')
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -112,9 +113,11 @@ def home(user):
 # ----------------------------- CREATE NEW PROJECT --------------------------------------------------- #
 
 
-@app.route('/<user>/new', methods=['GET', 'POST'])
-def new(user):
-    if session.get('user') == user:
+@app.route('/new', methods=['GET', 'POST'])
+def new():
+    if 'user' in session: 
+        user = session.get('user')
+            
         # POST (new project)
         if request.method == 'POST':
             try:
@@ -148,7 +151,7 @@ def new(user):
                     response.raise_for_status()
                 except:
                     if response.status_code == 401:
-                        return redirect("/") # need new fresh token
+                        return redirect("login") # need new fresh token
                     return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
                 try:
@@ -165,7 +168,7 @@ def new(user):
         # GET
         return render_template('new.html', user=user)
     else:
-        return redirect('/')
+        return redirect('login')
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -173,11 +176,10 @@ def new(user):
 # ------------------------------ START/CONTINUE ANNOTATION ------------------------------------------- #
 
 
-@app.route('/<user>/start', methods=['GET', 'POST'])
-def start(user):
-    if session.get('user') == user:
-
-        
+@app.route('/start', methods=['GET', 'POST'])
+def start():
+    if 'user' in session: 
+        user = session.get('user')
         params = {"type": "authorized"}
         
         try:
@@ -191,11 +193,10 @@ def start(user):
                     if status_code == 40: # token expired
                         result = refresh_token()
                         if result:
-                            return render_template("confirm.html", user=user)
                             return redirect(request.url, code=307)
                         else:
-                            return redirect("/")
-                return redirect("/")
+                            return redirect("login")
+                return redirect("login")
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
             
         if 'Error' in project_list:
@@ -221,7 +222,7 @@ def start(user):
                 response = requests.post(make_url("Annotations"), headers=make_header(), json=params)
                 response.raise_for_status()
             except:
-               return redirect("/") # need new fresh token
+               return redirect("login") # need new fresh token
             
         # POST -> start annotation
         if request.method == 'POST':
@@ -253,8 +254,8 @@ def start(user):
                             if result:
                                 return redirect(request.url, code=307)
                             else:
-                                return redirect("/")
-                    return redirect("/")
+                                return redirect("login")
+                    return redirect("login")
                 return render_template('projects.html', user=user, action='start', project_list=project_list, rep=True, msg=rspj['Error'])
             
 
@@ -270,7 +271,7 @@ def start(user):
         return render_template('projects.html', user=user, action='start', project_list=project_list)
         
     else:
-        return redirect('/')
+        return redirect('login')
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -278,9 +279,10 @@ def start(user):
 # ----------------------------------- GENERATE GOLD FILE --------------------------------------------- #
 
 
-@app.route('/<user>/gold', methods=['GET', 'POST'])
-def gold(user):
-    if session.get('user') == user:
+@app.route('/gold', methods=['GET', 'POST'])
+def gold():
+    if 'user' in session: 
+        user = session.get('user')
         
         params = {"type": "authorized"}
         
@@ -297,8 +299,8 @@ def gold(user):
                         if result:
                             return redirect(request.url, code=307)
                         else:
-                            return redirect("/")
-                return redirect("/")
+                            return redirect("login")
+                return redirect("login")
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
             
         if 'Error' in project_list:
@@ -314,7 +316,7 @@ def gold(user):
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("/")
+                    return redirect("login")
                 responsej = response.json()
                 return render_template('projects.html', user=user, action='gold', project_list=project_list, rep=True, msg=responsej['message'])
          
@@ -327,7 +329,7 @@ def gold(user):
         # GET
         return render_template('projects.html', user=user, action='gold', project_list=project_list)
     else:
-        return redirect('/')
+        return redirect('login')
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -335,9 +337,10 @@ def gold(user):
 # ------------------------------------ DELETE PROJECT ------------------------------------------------ #
 
 
-@app.route('/<user>/delete', methods=['GET', 'POST'])
-def delete(user):
-    if session.get('user') == user:
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    if 'user' in session: 
+        user = session.get('user')
         
         params = {"type": "owner"}
         
@@ -354,8 +357,8 @@ def delete(user):
                         if result:
                             return redirect(request.url, code=307)
                         else:
-                            return redirect("/")
-                return redirect("/")
+                            return redirect("login")
+                return redirect("login")
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
          
         if 'Error' in project_list:
@@ -373,7 +376,7 @@ def delete(user):
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("/")
+                    return redirect("login")
                 return render_template('projects.html', user=user, action='delete', project_list=project_list, rep=True, msg=responsej['message'])
      
             # -> PROJECT DELETED
@@ -393,8 +396,8 @@ def delete(user):
                                 if result:
                                     return redirect(request.url, code=307)
                                 else:
-                                    return redirect("/")
-                        return redirect("/")
+                                    return redirect("login")
+                        return redirect("login")
                     return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
             
                 if 'Error' in project_list:
@@ -405,7 +408,7 @@ def delete(user):
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=project_list)
     else:
-        return redirect('/')
+        return redirect('login')
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -413,9 +416,10 @@ def delete(user):
 # ------------------------------------ GET AUTHORIZATION PROJECT ------------------------------------- #
 
 
-@app.route('/<user>/authorization', methods=['GET', 'POST'])
-def authorization(user):
-    if session.get('user') == user:
+@app.route('/authorization', methods=['GET', 'POST'])
+def authorization():
+    if 'user' in session: 
+        user = session.get('user')
         
         params = {"type": "owner"}
         
@@ -432,8 +436,8 @@ def authorization(user):
                         if result:
                             return redirect(request.url, code=307)
                         else:
-                            return redirect("/")
-                return redirect("/")
+                            return redirect("login")
+                return redirect("login")
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
           
         if 'Error' in project_list:
@@ -446,7 +450,7 @@ def authorization(user):
             user_to = details['user']
 
             if (not project_id or not user_to):  # empty fields
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list)
 
             params = {"project_id": project_id, "user_to": user_to}
             
@@ -456,31 +460,31 @@ def authorization(user):
                 response.raise_for_status()
             except:
                 if response.status_code == 401:
-                    return redirect("/")
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list)
+                    return redirect("login")
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
-                return render_template('authorization.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list)
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list)
 
         # GET
-        return render_template('authorization.html', user=user, action='authorization', project_list=project_list)
+        return render_template('projects.html', user=user, action='authorization', project_list=project_list)
     else:
-        return redirect('/')
+        return redirect('login')
 
 # ---------------------------------------------------------------------------------------------------- #
 
 
 # --------------------------------------- DELETE ACCOUNT --------------------------------------------- #
 
-@app.route('/<user>/delete_account')
-def delete_account(user):
-    if session.get('user') == user:
+@app.route('/delete_account')
+def delete_account():
+    if 'user' in session: 
         try:
             response = requests.delete(make_url('Users'), headers=make_header())
             response.raise_for_status()
             return redirect("/")
         except:
-            return render_template("home.html")
+            return render_template("login")
     else:
         return redirect('/')
 

@@ -9,7 +9,8 @@ INSERT_IGNORE = 1
 
 def all_project_list(user):
     db = Dbconnect()
-    query = "SELECT P.ProjectId, P.ProjectName, P.ProjectOwner \
+    query = "SELECT P.ProjectId, P.ProjectName, P.ProjectOwner, \
+                    P.Phenomenon, P.TupleSize, P.ReplicateInstances \
             FROM Project P JOIN Authorization A ON P.ProjectId=A.Project \
             WHERE A.Authorized = %s"
     project_list = db.select_advanced(query, ("A.Authorized", user))
@@ -21,8 +22,8 @@ def all_project_list(user):
 def own_project_list(user):
     db = Dbconnect()
     condition = "ProjectOwner = %s"
-    project_list = db.select('Project', condition, 'ProjectId',
-                             'ProjectName', 'ProjectOwner', ProjectOwner=user)
+    project_list = db.select('Project', condition, 'ProjectId', 'ProjectName', 'ProjectOwner', 
+                             'Phenomenon', 'TupleSize', 'ReplicateInstances', ProjectOwner=user)
     db.close()
     return project_list
     # Returns the list of projects which the user is owner

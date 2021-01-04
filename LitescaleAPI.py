@@ -143,6 +143,9 @@ class ProjectListAPI(Resource):
         project_list = json.dumps([{"projectId": project[0],
                                     "projectName": project[1],
                                     "projectOwner": project[2],
+                                    "phenomenon": project[3],
+                                    "tuplesize": project[4],
+                                    "replicate": project[5],
                                     "Location": url_for('project', id=project[0], _external=True)}
                                    for project in project_list])
 
