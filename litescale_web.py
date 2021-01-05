@@ -28,11 +28,15 @@ def login():
             return render_template('login.html', error=True, msg='Complete all fields')
 
         try:
-            params = {"email": user, "password": password}
+            params = {'email': user, 'password': password}
             response = requests.post(make_url('Login'), json=params)
             responsej = response.json()
             response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            return render_template('error.html', msg="Could not connect to server")
         except:
+            if response.status_code == 500:
+                return render_template('error.html', msg="Internal server error")
             return render_template('login.html', error=True, msg=responsej['message'])
            
          # -> redirect to HOME MENU'
@@ -73,14 +77,18 @@ def signUp():
         password = details['password']
 
         if user and password:
-            params = {"email": details['email'],
-                     "password": details['password']}
+            params = {'email': details['email'],
+                     'password': details['password']}
 
             try:
                 response = requests.post(make_url('Users'), json=params)
                 responsej = response.json()
                 response.raise_for_status()
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
             except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
                 return render_template('registration.html', error=True, msg=responsej['message'])
 
             session['user'] = user
@@ -146,12 +154,16 @@ def new():
                 }
                 
                 try:
-                    response = requests.post(make_url("Projects"), headers=make_header(), files=files, json=params)
+                    response = requests.post(make_url('Projects'), headers=make_header(), files=files, json=params)
                     responsej = response.json()
                     response.raise_for_status()
+                except requests.exceptions.ConnectionError:
+                    return render_template('error.html', msg="Could not connect to server")
                 except:
+                    if response.status_code == 500:
+                        return render_template('error.html', msg="Internal server error")
                     if response.status_code == 401:
-                        return render_template('login.html', error=True, msg="Session expired. Re-login, please") # need new fresh token
+                        return render_template('login.html', error=True, msg='Session expired. Re-login, please') # need new fresh token
                     return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
                 try:
@@ -161,7 +173,7 @@ def new():
 
                 if 'result' in responsej and responsej['result'] == 'True':
                     # -> PROJECT CREATED
-                    return render_template('new.html',  user=user, rep=True, msg="Project created")
+                    return render_template('new.html',  user=user, rep=True, msg='Project created')
 
             else:  # empty fileds
                 return render_template('new.html',  user=user, rep=True, msg='Complete all fields')
@@ -180,12 +192,12 @@ def new():
 def start():
     if 'user' in session: 
         user = session.get('user')
-        params = {"type": "authorized"}
+        params = {'type': 'authorized'}
         
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
-            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
         elif 'Error' in project_list:
@@ -202,22 +214,26 @@ def start():
             answer_worst = details['worst']
 
             # annotate
-            params = {"project_id": project_id,
-                     "tup_id": tup_id,
-                     "answer_best": answer_best,
-                     "answer_worst": answer_worst}
+            params = {'project_id': project_id,
+                     'tup_id': tup_id,
+                     'answer_best': answer_best,
+                     'answer_worst': answer_worst}
 
             try:
-                response = requests.post(make_url("Annotations"), headers=make_header(), json=params)
+                response = requests.post(make_url('Annotations'), headers=make_header(), json=params)
                 response.raise_for_status()
-            except:  # need new fresh token
-               return render_template('login.html', error=True, msg="Session expired. Re-login, please") 
-               return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
+            except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
+                # need new fresh token 
+                return render_template('login.html', error=True, msg='Session expired. Re-login, please')
             
         # POST -> start annotation
         if request.method == 'POST':
             project_id = request.form['project_id']
-            params = {"project_id": project_id}
+            params = {'project_id': project_id}
             
             try:
                 response = requests.get(make_url('Projects'), params=params, headers=make_header())
@@ -235,7 +251,11 @@ def start():
                 rspj = progress = response.json()
                 response.raise_for_status()
             
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
             except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
                     if 'message' in project_list and 'sub_status' in project_list['message']:
                         status_code = project_list['message']['sub_status']
@@ -244,8 +264,8 @@ def start():
                             if result:
                                 return redirect(request.url, code=307)
                             else:
-                                return render_template('login.html', error=True, msg="Session expired. Re-login, please")
-                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                                return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list, rep=True, msg=rspj['Error'])
             
 
@@ -274,12 +294,12 @@ def gold():
     if 'user' in session: 
         user = session.get('user')
         
-        params = {"type": "authorized"}
+        params = {'type': 'authorized'}
         
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
-            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
         elif 'Error' in project_list:
@@ -293,13 +313,17 @@ def gold():
             try:
                 response = requests.get(make_url('Gold'), params=params, headers=make_header())
                 response.raise_for_status()
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
             except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
-                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 responsej = response.json()
                 return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
          
-            file = open("static/gold.tsv", 'wb')
+            file = open('static/gold.tsv', 'wb')
             file.write(response.content)
             file.close
 
@@ -321,12 +345,12 @@ def delete():
     if 'user' in session: 
         user = session.get('user')
         
-        params = {"type": "owner"}
+        params = {'type': 'owner'}
         
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
-            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
         elif 'Error' in project_list:
@@ -336,31 +360,35 @@ def delete():
         if request.method == 'POST':
             project_id = request.form['project_id']
 
-            params = {"project_id": project_id}
+            params = {'project_id': project_id}
             
             try:
                 response = requests.delete(make_url('Projects'), params=params, headers=make_header())
                 responsej = response.json()
                 response.raise_for_status()
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
             except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
-                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
      
             # -> PROJECT DELETED
             if 'result' in responsej and responsej['result'] == 'True':
-                params = {"type": "owner"}
+                params = {'type': 'owner'}
                 
                 rst, project_list, progress_list = get_project_list(params)
         
                 if rst is None: 
-                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 elif not rst:
                     return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
                 elif 'Error' in project_list:
                     return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
                 
-            return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg="Project deleted")
+            return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg='Project deleted')
         
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list)
@@ -378,12 +406,12 @@ def authorization():
     if 'user' in session: 
         user = session.get('user')
         
-        params = {"type": "owner"}
+        params = {'type': 'owner'}
         
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
-            return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
         elif 'Error' in project_list:
@@ -398,19 +426,23 @@ def authorization():
             if (not project_id or not user_to):  # empty fields
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list, progress_list=progress_list)
 
-            params = {"project_id": project_id, "user_to": user_to}
+            params = {'project_id': project_id, 'user_to': user_to}
             
             try:
                 response = requests.post(make_url('Authorization'), json=params, headers=make_header())
                 responsej = response.json()
                 response.raise_for_status()
+            except requests.exceptions.ConnectionError:
+                return render_template('error.html', msg="Could not connect to server")
             except:
+                if response.status_code == 500:
+                    return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
-                    return render_template('login.html', error=True, msg="Session expired. Re-login, please")
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list, progress_list=progress_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg="Authorization given correctly", project_list=project_list, progress_list=progress_list)
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization given correctly', project_list=project_list, progress_list=progress_list)
 
         # GET
         return render_template('projects.html', user=user, action='authorization', project_list=project_list, progress_list=progress_list)
@@ -428,9 +460,13 @@ def delete_account():
         try:
             response = requests.delete(make_url('Users'), headers=make_header())
             response.raise_for_status()
-            return redirect("/")
+            return redirect('/')
+        except requests.exceptions.ConnectionError:
+            return render_template('error.html', msg="Could not connect to server")
         except:
-            return render_template("login")
+            if response.status_code == 500:
+                return render_template('error.html', msg="Internal server error")
+            return render_template('login')
     else:
         return redirect('/')
 
@@ -440,15 +476,15 @@ def delete_account():
 # Auxiliar functions to make a url and header request
 
 def make_url(resource):
-    if   resource == 'Login': url = "http://localhost:5000/litescale/api/login"
-    elif resource == 'Users': url = "http://localhost:5000/litescale/api/users"
-    elif resource == 'ProjectList': url = "http://localhost:5000/litescale/api/projectList"
-    elif resource == 'Projects': url = "http://localhost:5000/litescale/api/projects"
-    elif resource == 'Tuples': url = "http://localhost:5000/litescale/api/tuples"
-    elif resource == 'Annotations': url = "http://localhost:5000/litescale/api/annotations"
-    elif resource == 'Gold': url = "http://localhost:5000/litescale/api/gold"
-    elif resource == 'Progress': url = "http://localhost:5000/litescale/api/progress"
-    elif resource == 'Authorization': url = "http://localhost:5000/litescale/api/authorizations"
+    if   resource == 'Login': url = 'http://localhost:5000/litescale/api/login'
+    elif resource == 'Users': url = 'http://localhost:5000/litescale/api/users'
+    elif resource == 'ProjectList': url = 'http://localhost:5000/litescale/api/projectList'
+    elif resource == 'Projects': url = 'http://localhost:5000/litescale/api/projects'
+    elif resource == 'Tuples': url = 'http://localhost:5000/litescale/api/tuples'
+    elif resource == 'Annotations': url = 'http://localhost:5000/litescale/api/annotations'
+    elif resource == 'Gold': url = 'http://localhost:5000/litescale/api/gold'
+    elif resource == 'Progress': url = 'http://localhost:5000/litescale/api/progress'
+    elif resource == 'Authorization': url = 'http://localhost:5000/litescale/api/authorizations'
 
     return url
     
@@ -462,7 +498,7 @@ def make_header():
 def refresh_token():
     if 'RefreshToken' in session:
         header = {'Authorization': 'Bearer {}'.format(session.get('RefreshToken'))}
-        response = requests.post("http://localhost:5000/litescale/api/token", headers=header)
+        response = requests.post('http://localhost:5000/litescale/api/token', headers=header)
         response_json = response.json()
     
         if response.status_code == 200:
@@ -496,7 +532,7 @@ def get_project_list(params):
     for project in project_list:
         try:
             p_id = project['projectId']
-            params = {"project_id": p_id }
+            params = {'project_id': p_id }
             response = requests.get(make_url('Progress'), params=params, headers=make_header())
             progress = response.json()
             response.raise_for_status()
