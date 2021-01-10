@@ -95,10 +95,7 @@ class UsersAPI(Resource):
         if not result:
             raise EmailAlreadyExistsError
 
-        expires = datetime.timedelta(minutes=30)
-        token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
-                 'RefreshToken': create_refresh_token(identity=email)}
-        return jsonify(token)
+        return {"result" : "True"}
 
     # Delete user
     @fresh_jwt_required

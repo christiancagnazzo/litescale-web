@@ -91,12 +91,25 @@ def signUp():
                     return render_template('error.html', msg="Internal server error")
                 return render_template('registration.html', error=True, msg=responsej['message'])
 
+            if 'result' in responsej and responsej['result'] == 'True':
+                try:
+                    params = {'email': user, 'password': password}
+                    response = requests.post(make_url('Login'), json=params)
+                    responsej = response.json()
+                    response.raise_for_status()
+                except requests.exceptions.ConnectionError:
+                    return render_template('error.html', msg="Could not connect to server")
+                except:
+                    if response.status_code == 500:
+                        return render_template('error.html', msg="Internal server error")
+                    return render_template('login.html', error=True, msg=responsej['message'])
+           
+            # -> redirect to HOME MENU'
             session['user'] = user
             session['AccessToken'] = responsej['AccessToken']
             session['RefreshToken'] = responsej['RefreshToken']
-            # -> redirect to HOME MENU'
             return redirect('home')
-
+                
         else:  # empty fields
             return render_template('registration.html', error=True, msg='Complete all fields')
     # GET
