@@ -1,7 +1,7 @@
 from tests.BaseCase import BaseCase, EMAIL_TEST, PASSWORD_TEST
 import json
 
-class TestUserLogin(BaseCase):
+class TestUserSignUp(BaseCase):
     
     def test_successful_signup(self):
         payload = json.dumps({
