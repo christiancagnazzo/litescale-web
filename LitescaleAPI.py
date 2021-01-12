@@ -201,10 +201,9 @@ class ProjectsAPI(Resource):
     
     # Create a new project
     @fresh_jwt_required
-    @use_args({"file": fields.Field(required=True)}, location="files")
-    def post(self, files):  
+    def post(self):  
         email = get_jwt_identity()
-        
+    
         if not request.files or not request.form:
            raise MissingProjectInfoError
             
@@ -216,7 +215,7 @@ class ProjectsAPI(Resource):
             
         info = json.loads((request.form['json']))
         
-        if not info['project_name'] or not info['tuple_size'] or not info['phenomenon'] or not info['replication']:
+        if not 'project_name' in info or not 'tuple_size' in info or not 'phenomenon' in info or not 'replication' in info:
             raise MissingProjectInfoError
         
         instance_file =  request.files['file']
@@ -246,7 +245,7 @@ class ProjectsAPI(Resource):
             pass
 
         if (not project_id):  # project not created
-            raise InternalServerError
+            raise InvalidFileUploadError
 
         return {"result": "True"}
 
