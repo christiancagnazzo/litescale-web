@@ -64,7 +64,7 @@ errors = {
         "status": 401
     },
     "InvalidFileUploadError": {
-        "message": "Invalid file, upload a tsv file",
+        "message": "Invalid file upload",
         "status": 400
     },
     "MissingProjectInfoError": {

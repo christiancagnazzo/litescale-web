@@ -247,7 +247,7 @@ class ProjectsAPI(Resource):
         if (not project_id):  # project not created
             raise InvalidFileUploadError
 
-        return {"result": "True"}
+        return {"result": "True", "id": project_id}
 
 # ---------------------------------------------------------------------------------------------------- #
 

@@ -158,7 +158,11 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
             condition = 'ProjectId = %s'
             db.delete('Project', condition, project_id)
             return ERROR, "Wrong instance file format"
-            
+    
+    if (len(instances) <= tuple_size):        
+        condition = 'ProjectId = %s'
+        db.delete('Project', condition, project_id)
+        return ERROR, "Wrong instance file format"
 
     # Make tuples
     tuples = make_tuples(instances, tuple_size, replication)
@@ -177,7 +181,7 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
                       instance_id[0], tup_id, project_id)
 
     db.close()
-    return NOT_ERROR, "Project create correctly"
+    return project_id, "Project create correctly"
     # Create a new project
 
 
