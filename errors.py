@@ -15,6 +15,9 @@ class UnauthorizedError(HTTPException):
 class InvalidEmailError(HTTPException):
     pass
 
+class InvalidPasswordError(HTTPException):
+    pass
+
 class ResourceNotFoundError(HTTPException):
     pass
 
@@ -49,6 +52,10 @@ errors = {
     },
     "InvalidEmailError": {
         "message": "Invalid email",
+        "status": 400
+    },
+    "InvalidPasswordError": {
+        "message": "Password must be length at least 6 characters and  must have at least one number, one uppercase and one lowercase character",
         "status": 400
     },
     "ResourceNotFoundError": {

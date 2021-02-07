@@ -8,8 +8,8 @@
 <!-- First Grid -->
 <div class="w3-row-padding w3-padding-64 w3-container w3-white">
   <div class="w3-content">
-    <div class="w3-twothird">
-      <h1>Start to annotate your project with the BWS method</h1>
+    <div>
+      <h1>Annotate your project with the BWS method</h1>
       <h5 class="w3-padding-10">The Best-Worst Scaling model (BWS) is a comparative annotation process
                                 developed by Louviere and Woodworth (1991).
                                 In a nutshell, a BWS model presents annotators
@@ -23,20 +23,13 @@
                                 tensity annotation, which are intrinsically nuanced
                                 and hardly fit in any fixed scale.</h5>
     </div>
-    <div class="w3-third w3-center">
-      <i class="fa fa-book w3-padding-64 w3-text-green w3-margin-right"></i>
-    </div>
   </div>
 </div>
 
 <!-- Second Grid -->
 <div class="w3-row-padding w3-light-grey w3-padding-64 w3-container w3-grey">
   <div class="w3-content">
-    <div class="w3-third w3-center">
-      <i class="fa fa-book w3-padding-64 w3-text-green w3-margin-right"></i>
-    </div>
-
-    <div class="w3-twothird">
+    <div>
       <h1>BWS</h1>
       <h5 class="w3-padding-10">The Best-Worst Scaling model (BWS) is a comparative annotation process
                                 developed by Louviere and Woodworth (1991).
@@ -54,17 +47,6 @@
   </div>
 </div>
 
-<!--
-<span><p onclick="delete_account()">Delete your account</p><span>  
-<script>
-function delete_account(){
-    if (confirm("Are you sure you want to delete the account?")) {
-        window.location.href = "delete_account";
-    }
-}
-</script>
--->
-
 <script>
 window.onload = function(){
   $("#out").hide();
@@ -72,6 +54,7 @@ window.onload = function(){
   $("#start").hide();
   $("#new").hide();
   $("#gold").hide();
+  $("#delAcc").hide();
   $("#del").hide();
   $("#auth").hide();
   document.getElementById("bar").classList.add("w3-green");
@@ -84,9 +67,16 @@ window.onload = function(){
     $("#gold").show();
     $("#del").show();
     $("#auth").show();
+    $("#delAcc").show();
   } else {
     $("#in").show();
   }
+}
+
+function delete_account(){
+    if (confirm("Are you sure you want to delete the account and all projects?")) {
+        window.location.href = "delete_account";
+    }
 }
 </script>
 

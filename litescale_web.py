@@ -43,6 +43,8 @@ def login():
         session['user'] = user
         session['AccessToken'] = responsej['AccessToken']
         session['RefreshToken'] = responsej['RefreshToken']
+        if 'current_location' in session:
+            return redirect(session['current_location'])
         return redirect('home')
 
     # GET
@@ -58,6 +60,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('current_location', None)
     session.pop('AccessToken', None)
     session.pop('RefreshToken', None)
     return redirect('/')
@@ -176,6 +179,7 @@ def new():
                     if response.status_code == 500:
                         return render_template('error.html', msg="Internal server error")
                     if response.status_code == 401:
+                        session['current_location'] = request.path
                         return render_template('login.html', error=True, msg='Session expired. Re-login, please') # need new fresh token
                     return render_template('new.html',  user=user, rep=True, msg=responsej['message'])
                 
@@ -186,7 +190,8 @@ def new():
 
                 if 'result' in responsej and responsej['result'] == 'True':
                     # -> PROJECT CREATED
-                    return render_template('new.html',  user=user, rep=True, msg='Project created')
+                    return redirect('start')
+                    #return render_template('new.html',  user=user, rep=True, msg='Project created')
 
             else:  # empty fileds
                 return render_template('new.html',  user=user, rep=True, msg='Complete all fields')
@@ -210,6 +215,7 @@ def start():
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
+            session['current_location'] = request.path
             return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
@@ -241,6 +247,7 @@ def start():
                 if response.status_code == 500:
                     return render_template('error.html', msg="Internal server error")
                 # need new fresh token 
+                session['current_location'] = request.path
                 return render_template('login.html', error=True, msg='Session expired. Re-login, please')
             
         # POST -> start annotation
@@ -258,12 +265,13 @@ def start():
                 response.raise_for_status()
                 
                 if 'Error' in tuples:  # no tuple
+                    progress_list[int(project_id)] = '100.0'
                     return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list ,rep=True, msg=tuples['Error'])
                 
                 response = requests.get(make_url('Progress'), params=params, headers=make_header())
                 rspj = progress = response.json()
                 response.raise_for_status()
-            
+                
             except requests.exceptions.ConnectionError:
                 return render_template('error.html', msg="Could not connect to server")
             except:
@@ -277,7 +285,9 @@ def start():
                             if result:
                                 return redirect(request.url, code=307)
                             else:
+                                session['current_location'] = request.path
                                 return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                    session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list, rep=True, msg=rspj['Error'])
             
@@ -312,6 +322,7 @@ def gold():
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
+            session['current_location'] = request.path
             return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
@@ -332,6 +343,7 @@ def gold():
                 if response.status_code == 500:
                     return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
+                    session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 responsej = response.json()
                 return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
@@ -363,6 +375,7 @@ def delete():
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
+            session['current_location'] = request.path
             return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
@@ -385,6 +398,7 @@ def delete():
                 if response.status_code == 500:
                     return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
+                    session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
      
@@ -395,6 +409,7 @@ def delete():
                 rst, project_list, progress_list = get_project_list(params)
         
                 if rst is None: 
+                    session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 elif not rst:
                     return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
@@ -424,6 +439,7 @@ def authorization():
         rst, project_list, progress_list = get_project_list(params)
         
         if rst is None: 
+            session['current_location'] = request.path
             return render_template('login.html', error=True, msg='Session expired. Re-login, please')
         elif not rst:
             return render_template('projects.html', user=user, action='authorization', rep=True, msg=project_list['message'])
@@ -451,11 +467,15 @@ def authorization():
                 if response.status_code == 500:
                     return render_template('error.html', msg="Internal server error")
                 if response.status_code == 401:
+                    session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list, progress_list=progress_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization given correctly', project_list=project_list, progress_list=progress_list)
+            else:
+                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization not given correctly', project_list=project_list, progress_list=progress_list)
+            
 
         # GET
         return render_template('projects.html', user=user, action='authorization', project_list=project_list, progress_list=progress_list)
@@ -473,7 +493,7 @@ def delete_account():
         try:
             response = requests.delete(make_url('Users'), headers=make_header())
             response.raise_for_status()
-            return redirect('/')
+            return redirect('logout')
         except requests.exceptions.ConnectionError:
             return render_template('error.html', msg="Could not connect to server")
         except:

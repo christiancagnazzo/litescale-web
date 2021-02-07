@@ -1,10 +1,4 @@
-<html>
-<head>
-    <title>Litescale</title>
-    <link type="text/css" rel="stylesheet" href="/static/css/litescale_login.css" />
-
-</head>
-<body>
+{% include 'header.html' %}
 
 <div class="container">
     <div id="loginContainer">
@@ -28,5 +22,19 @@
     </div>
 </div>
 
+<script>
+window.onload = function(){
+  $("#out").hide();
+  $("#in").hide();
+  $("#start").hide();
+  $("#new").hide();
+  $("#delAcc").hide();
+  $("#gold").hide();
+  $("#del").hide();
+  $("#auth").hide();
+  document.getElementById("bar").classList.add("w3-green");
+  document.getElementById("home").classList.add("w3-green");
+}
+</script>
 
 {% include 'footer.html' %}

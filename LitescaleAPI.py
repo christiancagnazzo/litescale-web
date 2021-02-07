@@ -44,7 +44,7 @@ class LoginAPI(Resource):
         if not check_password_hash(user[0][1], password): 
             raise UnauthorizedError
 
-        expires = datetime.timedelta(minutes=30)
+        expires = datetime.timedelta(minutes=60)
         token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=True),
                  'RefreshToken': create_refresh_token(identity=email)}
         return jsonify(token)
@@ -61,7 +61,7 @@ class RefreshTokenAPI(Resource):
     @jwt_refresh_token_required
     def post(self):
         email = get_jwt_identity()
-        expires = datetime.timedelta(minutes=30)
+        expires = datetime.timedelta(minutes=60)
         token = {'AccessToken': create_access_token(identity=email, expires_delta=expires, fresh=False)}
         return jsonify(token)
     
@@ -86,9 +86,15 @@ class UsersAPI(Resource):
         password = args['password']
         
         regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-        if not re.search(regex,email): 
+        pat = re.compile(regex)
+        if not re.search(pat,email): 
             raise InvalidEmailError
 
+        regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!#%*?&]{6,20}$"
+        pat = re.compile(regex)
+        if not re.search(pat,password): 
+            raise InvalidPasswordError
+    
         password = generate_password_hash(password)
 
         result, msg = insert_user(email, password)
@@ -400,7 +406,7 @@ class AuthorizationAPI(Resource):
         rst, msg = get_authorization(project_id, user_to)
         
         if not rst:
-            raise InternalServerError
+            return {'result': 'False'}
             
         return {'result': 'True'}
             

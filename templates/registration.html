@@ -1,10 +1,4 @@
-<html>
-<head>
-    <title>Litescale</title>
-    <link type="text/css" rel="stylesheet" href="/static/css/litescale_login.css" />
-
-</head>
-<body>
+{% include 'header.html' %}
 
 <div class="container">
     <div id="signupContainer">
@@ -19,10 +13,23 @@
                 <span> {{ msg }} </span>
             {% endif%}
             </div>
-
         </form>
     </div>
 </div>
 
+<script>
+window.onload = function(){
+  $("#out").hide();
+  $("#in").hide();
+  $("#start").hide();
+  $("#new").hide();
+  $("#gold").hide();
+  $("#del").hide();
+  $("#auth").hide();
+  $("#delAcc").hide();
+  document.getElementById("bar").classList.add("w3-red");
+  document.getElementById("home").classList.add("w3-red");
+}
+</script>
 
 {% include 'footer.html' %}
