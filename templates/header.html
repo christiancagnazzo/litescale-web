@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Litescale</title>
@@ -16,16 +17,111 @@
 
 <!-- Navbar -->
 <div class="w3-top">
-  <div id="bar" class="w3-bar w3-card w3-left-align w3-large">
-    <a href="/home" id="home" class="w3-bar-item w3-button w3-padding-large w3-hover-white">HOME</a>
-    <a href="/start" id="start" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Start</a>
-    <a href="/new" id="new" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">New</a>
-    <a href="/gold" id="gold" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Gold</a>
-    <a href="/authorization" id="auth" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Authorization</a>
-    <a href="/delete" id="del" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Delete</a>
-    <a id="in" href="/login" style="float: right !important;" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Log-In</a>
-    <a id="out" href="/logout" style="float: right !important;" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Log-Out</a>
-    <span id="us" style="float: right !important;" class="w3-bar-item w3-hide-small w3-padding-large"></span>
-    <span id="delAcc" class="w3-bar-item w3-hide-small w3-padding-large" onclick="delete_account()">Delete your account<span>  
+  <div id="bar" class="navbar w3-bar w3-card w3-left-align w3-large">
+    <a href="/home" id="home">HOME</a>
+    <a href="/start" id="start">Start</a>
+    <a href="/new" id="new">New</a>
+    <a href="/gold" id="gold">Gold</a>
+    <a href="/authorization" id="auth">Authorization</a>
+    <a href="/delete" id="del">Delete</a>
+    <a href="/login" id="in" style="float: right !important;">Log-In</a>
+    <a href="/logout" id="out" style="float: right !important;">Log-Out</a>
+    
+    <div class="dropdown">
+    <button id="user" class="dropbtn" onclick="myFunction()">{{user}}
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content" id="myDropdown">
+      <a href="" onclick="delete_account()">Delete account</a>
+    </div>
+    </div> 
   </div>
 </div>
+
+<style>
+.navbar {
+  overflow: hidden;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.dropdown {
+  float: right;
+  overflow: hidden;
+}
+
+.dropdown .dropbtn {
+  cursor: pointer;
+  font-size: 16px;  
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn, .dropbtn:focus {
+  background-color: white;
+  color: black;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  padding: 7px;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.show {
+  display: block;
+}
+</style>
+
+<script>
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(e) {
+  if (!e.target.matches('.dropbtn')) {
+  var myDropdown = document.getElementById("myDropdown");
+    if (myDropdown.classList.contains('show')) {
+      myDropdown.classList.remove('show');
+    }
+  }
+}
+
+function delete_account(){
+    if (confirm("Are you sure you want to delete the account and all projects?")) {
+        window.location.href = "delete_account";
+    }
+}
+</script>

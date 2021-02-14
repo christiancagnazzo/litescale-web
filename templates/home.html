@@ -60,7 +60,6 @@ window.onload = function(){
   document.getElementById("bar").classList.add("w3-green");
   document.getElementById("home").classList.add("w3-white");
   if ("{{user}}"){
-    document.getElementById("us").innerHTML = "{{user}}";
     $("#out").show();
     $("#start").show();
     $("#new").show();
@@ -71,12 +70,6 @@ window.onload = function(){
   } else {
     $("#in").show();
   }
-}
-
-function delete_account(){
-    if (confirm("Are you sure you want to delete the account and all projects?")) {
-        window.location.href = "delete_account";
-    }
 }
 </script>
 

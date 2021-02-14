@@ -73,14 +73,3 @@ input.instance:disabled {
     margin: 0 auto;
     width: 300px;
 }
-
-#delAcc {
-    float: right;
-    cursor: pointer;
-}
-
-#delAcc:hover {
-    float: right;
-    color: black;
-    background-color: aliceblue;
-}
