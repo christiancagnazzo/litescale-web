@@ -57,6 +57,7 @@ window.onload = function(){
   $("#delAcc").hide();
   $("#del").hide();
   $("#auth").hide();
+  $("#ar").hide();
   document.getElementById("bar").classList.add("w3-green");
   document.getElementById("home").classList.add("w3-white");
   if ("{{user}}"){
@@ -67,6 +68,7 @@ window.onload = function(){
     $("#del").show();
     $("#auth").show();
     $("#delAcc").show();
+    $("#ar").show();
   } else {
     $("#in").show();
   }
