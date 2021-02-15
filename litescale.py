@@ -78,11 +78,24 @@ def delete_project(project_id):
 def get_authorization(project_id, user):
     db = Dbconnect()
     result = db.insert('Authorization', INSERT, project_id, user)
+    db.close()
     if (isinstance(result, int)):
         return NOT_ERROR, "Authorization given correctly"
     else:
         return ERROR, "Authorization not given correctly"
     # Get authorization
+
+
+def remove_authorization(project_id, user):
+    db = Dbconnect()
+    condition = 'Project = %s && Authorized = %s'
+    result = db.delete('Authorization', condition, project_id, user)
+    db.close()
+    if (isinstance(result, int) and result > 0):
+        return NOT_ERROR, "Authorization removed correctly"
+    else:
+        return ERROR, "Authorization not removed correctly"
+    # Remove authorization
 
 
 def check_authorization(project_id, user):

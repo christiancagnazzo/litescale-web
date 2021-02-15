@@ -5,6 +5,8 @@ from flask_jwt_extended import JWTManager, jwt_required, fresh_jwt_required, jwt
 from webargs.flaskparser import use_args, parser
 from webargs import fields
 import datetime
+import smtplib
+from email.mime.text import MIMEText
 from errors import *
 from litescale import *
 import json
@@ -101,6 +103,23 @@ class UsersAPI(Resource):
         if not result:
             raise EmailAlreadyExistsError
 
+        mail = {
+        'from' : 'ciaociao.d@virgilio.it',
+        'object' : 'LITESCALE - CONFIRM REGISTRATION',
+        'message' : 'Welcome '+email+',<br> Log in now and start to annotate!<br> http://127.0.0.1:5002/home'
+        }
+        
+        # Connect to server
+        server = smtplib.SMTP_SSL('out.virgilio.it', 465)
+        # Login
+        server.login(mail['from'], "6$ki7M!n8y3a2zc")
+        # Send mail
+        msg = MIMEText(mail['message'], 'html', 'utf-8')
+        msg['Subject'] = mail['object']
+        msg['From'] = mail['from']
+        msg['To'] = email 
+        server.sendmail(mail['from'], email, msg.as_string())
+        
         return {"result" : "True"}
 
     # Delete user
@@ -389,7 +408,7 @@ class AuthorizationAPI(Resource):
         "project_id": fields.Int(required=True),
         "user_to": fields.String(required=True),
     }
-
+    
     # Add authorization
     @fresh_jwt_required
     @use_args(user_args, location="json")
@@ -407,7 +426,47 @@ class AuthorizationAPI(Resource):
         
         if not rst:
             return {'result': 'False'}
+        
+        mail = {
+        'from' : 'ciaociao.d@virgilio.it',
+        'object' : 'LITESCALE - YOU HAVE BEEN AUTHORIZED TO A NEW PROJECT',
+        'message' : 'Ehi '+user_to+',<br>'+email+' has just authorized you to his project.<br> Log in now and start to annotate!<br> http://127.0.0.1:5002/home'
+        }
+        
+        # Connect to server
+        server = smtplib.SMTP_SSL('out.virgilio.it', 465)
+        # Login
+        server.login(mail['from'], "6$ki7M!n8y3a2zc")
+        # Send mail
+        msg = MIMEText(mail['message'], 'html', 'utf-8')
+        msg['Subject'] = mail['object']
+        msg['From'] = mail['from']
+        msg['To'] = user_to 
+        server.sendmail(mail['from'], user_to, msg.as_string())
             
+        return {'result': 'True'}
+    
+    # Remove authorization
+    @fresh_jwt_required
+    @use_args(user_args, location="json")
+    def delete(self, args):
+        email = get_jwt_identity()
+        project_id = args['project_id']
+        user_to = args['user_to']
+        
+        rst, msg = check_owner(project_id, email)
+
+        if not rst:
+            raise UnauthorizedProjectError
+            
+        if email == user_to:
+            return {'result': 'False'}
+        
+        rst, msg = remove_authorization(project_id, user_to)
+        
+        if not rst:
+            return {'result': 'False'}
+         
         return {'result': 'True'}
             
 # ---------------------------------------------------------------------------------------------------- #
@@ -441,7 +500,7 @@ def invalid_token_callback():
     response = {"message": "Invalid token", "sub_status": 42} # invalid token
     abort(401, description=response)
       
-
+    
    
 if __name__ == '__main__':
     app.run(debug=True)

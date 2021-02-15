@@ -7,7 +7,15 @@
 
 <div class="w3-container">
     <p id="p" class="w3-xlarge w3-center w3-margin"></p>
-    <table style="margin-top: 30px" class="w3-table w3-hoverable w3-large w3-card-4">    
+    <form style="margin-top: 10px; text-align:center; font-size:22px;" id="authorization" name="authorization" action="" method="post">
+    User: <input id="user" name="user"/><br>
+    <input  style="margin-left:50px" type="radio" id="auth" name="option" value="give" checked>
+    <label>Authorize</label>
+    <input type="radio" name="option" value="remove">
+    <label>Deauthorize</label>
+    <input id="project_id_a" name="project_id" type="hidden" value=""><br>
+    </form>
+    <table style="margin-top: 20px" class="w3-table w3-hoverable w3-large w3-card-4">    
         <thead>
             <tr class="w3-light-grey">
                 <th>Project Name</th>
@@ -37,14 +45,10 @@
     </table>   
 </div>
 
-<form style="margin-top: 60px; text-align:center; font-size:25px;" id="authorization" name="authorization" action="" method="post">
-    User to be authorized <input id="user" name="user"/>
-    <input id="project_id_a" name="project_id" type="hidden" value=""><br><br>
-</form>
-
 <div class="w3-center w3-text-red w3-margin w3-xlarge">    
     <p id="msg"> {{ msg }}</p>
 </div>
+
 {% include 'footer.html' %}
 
 
@@ -83,7 +87,7 @@ window.onload = function(){
             $(".el").addClass("w3-hover-red w3-pale-red");
         }
         else if ("{{action}}" == "authorization"){
-            $("#p").text("Enter the user you want to authorize in the field and then click the desired project");
+            $("#p").text("Enter the user, choose the option and click on the desired project");
             $("#p").addClass("w3-text-blue");
             $("#authorization").show();
             document.getElementById("title").innerHTML = "Authorize a user to annotate your project"; 
@@ -101,7 +105,7 @@ function post_request(project_id){
             document.getElementById('request_project').submit();
         }
     } else if ("{{action}}" == 'authorization'){
-        if (confirm("Are you sure you want to authorize this user?")) {
+        if (confirm("Are you sure you want to authorize/deauthorize this user?")) {
             document.getElementById('project_id_a').value=project_id;
             document.getElementById('authorization').submit();
         }

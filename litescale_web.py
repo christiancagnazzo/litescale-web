@@ -44,7 +44,9 @@ def login():
         session['AccessToken'] = responsej['AccessToken']
         session['RefreshToken'] = responsej['RefreshToken']
         if 'current_location' in session:
-            return redirect(session['current_location'])
+            location = session['current_location']
+            session.pop('current_location', None)
+            return redirect(location)
         return redirect('home')
 
     # GET
@@ -451,6 +453,7 @@ def authorization():
             details = request.form
             project_id = details['project_id']
             user_to = details['user']
+            option = details['option']
 
             if (not project_id or not user_to):  # empty fields
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg='Complete all fields', project_list=project_list, progress_list=progress_list)
@@ -458,7 +461,10 @@ def authorization():
             params = {'project_id': project_id, 'user_to': user_to}
             
             try:
-                response = requests.post(make_url('Authorization'), json=params, headers=make_header())
+                if (option == 'give'):
+                    response = requests.post(make_url('Authorization'), json=params, headers=make_header())
+                else:
+                    response = requests.delete(make_url('Authorization'), json=params, headers=make_header())
                 responsej = response.json()
                 response.raise_for_status()
             except requests.exceptions.ConnectionError:
@@ -472,9 +478,15 @@ def authorization():
                 return render_template('projects.html', user=user, action='authorization', rep=True, msg=responsej['message'], project_list=project_list, progress_list=progress_list)
             
             if 'result' in responsej and responsej['result'] == 'True':
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization given correctly', project_list=project_list, progress_list=progress_list)
+                if (option == 'give'):
+                    return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization given correctly', project_list=project_list, progress_list=progress_list)
+                else:
+                    return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization removed correctly', project_list=project_list, progress_list=progress_list)
             else:
-                return render_template('projects.html', user=user, action='authorization', rep=True, msg='Authorization not given correctly', project_list=project_list, progress_list=progress_list)
+                if (option == 'give'):
+                    return render_template('projects.html', user=user, action='authorization', rep=True, msg='User already authorized or not existing', project_list=project_list, progress_list=progress_list)
+                else:
+                    return render_template('projects.html', user=user, action='authorization', rep=True, msg='User not authorized or not existing', project_list=project_list, progress_list=progress_list)
             
 
         # GET

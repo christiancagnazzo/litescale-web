@@ -121,7 +121,8 @@ window.onclick = function(e) {
 
 function delete_account(){
     if (confirm("Are you sure you want to delete the account and all projects?")) {
-        window.location.href = "delete_account";
+        event.preventDefault();
+        window.location.replace("delete_account");
     }
 }
 </script>
