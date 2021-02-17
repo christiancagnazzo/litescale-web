@@ -1,19 +1,19 @@
 {% include 'header.html' %}
 
 <!-- Header -->
-<header class="w3-container w3-deep-purple w3-center" style="padding-top:40px">
-  <h1 class="w3-margin">Create a new project</h1>
+<header id="head" class="w3-container w3-center" style="padding-top:40px">
+  <h1 id="title" class="w3-margin">Create a new project</h1>
 </header>
 
 
 <div class="w3-container" style="width:35%; margin: 0 auto;">
     <form style="text-align:left; padding:30px;"class="w3-container" name="new" action="" method="post" enctype="multipart/form-data">
-        <label class="w3-text-purple">Project name</label>
+        <label style="color:#547097">Project name</label>
         <input class="w3-input w3-border w3-light-grey" name="project_name" type="text" size="40"/><br/>
-        <label class="w3-text-purple">Phenomenon (e.g., offensive, positive)</label>
+        <label style="color:#547097">Phenomenon (e.g., offensive, positive)</label>
         <input class="w3-input w3-border w3-light-grey" name="phenomenon" type="text" /><br/>
     
-        <label class="w3-text-purple">Dimension of the tuples</label>
+        <label style="color:#547097">Dimension of the tuples</label>
         <select class="w3-select" name="tuple_size">
             <option value="2">2</option>
             <option value="3">3</option>
@@ -26,7 +26,7 @@
             <option value="10">10</option>
         </select><br/>
 
-        <label class="w3-text-purple">Replication of the instances</label>
+        <label style="color:#547097">Replication of the instances</label>
         <select class="w3-select" name="replication">
             <option value="2">2</option>
             <option value="3">3</option>
@@ -39,7 +39,7 @@
             <option value="10">10</option>
         </select><br/>
         
-        <label class="w3-text-purple">Read instances from tab-separated file</label>
+        <label style="color:#547097">Read instances from tab-separated file</label>
         <input type="file" name="instance_file" /><br>
 
         <div class="create">
@@ -59,7 +59,9 @@ window.onload = function(){
     $("#in").hide();
     $("#delAcc").hide();
     $("#authorization").hide();
-    document.getElementById("bar").classList.add("w3-deep-purple");
+    $("#bar").css("background-color","#547097");
+    $("#head").css("background-color","#547097");
+    $("#title").css("color","white");
     document.getElementById("new").classList.add("w3-white");
 }
 </script>

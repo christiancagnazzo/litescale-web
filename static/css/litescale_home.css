@@ -1,9 +1,9 @@
-body,h1,h2,h3,h4,h5,h6 {
-    font-family: "Lato", sans-serif;
-}
-
-body {
-    background-color: #f2f2f2;
+body,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif;}
+body, html {
+  height: 100%;
+  color: #777;
+  line-height: 1.8;
+  background-color: white;
 }
 
 h1 {
@@ -22,7 +22,7 @@ form label {
     border-radius: 10px;
     font-size: 20px;
     padding: 4px;
-    background-color: purple;
+    background-color: #547097;
     cursor: pointer;
     color: white;
 }
@@ -72,4 +72,11 @@ input.instance:disabled {
     border-color: teal;
     margin: 0 auto;
     width: 300px;
+}
+
+
+/* First image (Logo. Full height) */
+.bgimg-1 {
+  background-color: #1A535C;
+  min-height: 100%;
 }

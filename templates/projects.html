@@ -15,7 +15,7 @@
     <label>Deauthorize</label>
     <input id="project_id_a" name="project_id" type="hidden" value=""><br>
     </form>
-    <table style="margin-top: 20px" class="w3-table w3-hoverable w3-large w3-card-4">    
+    <table style="margin-top: 20px; color:black" class="w3-table w3-hoverable w3-large w3-card-4">    
         <thead>
             <tr class="w3-light-grey">
                 <th>Project Name</th>
@@ -58,43 +58,61 @@ window.onload = function(){
         $("#delAcc").hide();
         $("#authorization").hide();
         if ("{{action}}" == "start"){
-            $("#p").text("Click the project you want to annotate");
-            $("#p").addClass("w3-text-teal");
-            document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
-            document.getElementById("bar").classList.add("w3-teal");
+            $("#bar").css("background-color","#2E637B");
             document.getElementById("start").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-teal");
-            $(".el").addClass("w3-hover-teal");
-            $(".el").css("background-color","#c6ebd9");
+            $("#head").css("background-color","#2E637B");
+            document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
+            $("#title").css("color","white");
+            $(".el").css("color","white");
+            $("#p").text("Click the project you want to annotate");
+            $("#p").css("color","#2E637B");
+            $(".el").css("background-color","#4084a3");
+            $('.el').hover(function(){
+                $(this).css("background-color","#2E637B")},
+                    function () {$(this).css("background-color","#4084a3")});        
         }
         else if ("{{action}}" == "gold"){
+            $("#bar").css("background-color","#837AA9");
+            $("#head").css("background-color","#837AA9");
+            $("#title").css("color","white");
+            $("#p").css("color","#837AA9");
+            $(".el").css("color","white");
+            $(".el").css("background-color","#9792a8");
+            $('.el').hover(function(){
+                $(this).css("background-color","#837AA9")},
+                    function () {$(this).css("background-color","#9792a8")});
             $("#p").text("Click the project of which you want to generate the gold file");
-            $("#p").addClass("w3-text-deep-orange");
             document.getElementById("title").innerHTML = "Generate the gold standard file of a project";
-            document.getElementById("bar").classList.add("w3-deep-orange");
             document.getElementById("gold").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-deep-orange");
-            $(".el").addClass("w3-hover-deep-orange");
-            $(".el").css("background-color","#ffe0cc");
-        }
+            }
         else if ("{{action}}" == "delete"){
             $("#p").text("Click the project you want to delete");
-            $("#p").addClass("w3-text-red");
             document.getElementById("title").innerHTML = "Delete a your project"; 
-            document.getElementById("bar").classList.add("w3-red");
             document.getElementById("del").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-red");
-            $(".el").addClass("w3-hover-red w3-pale-red");
+            $("#bar").css("background-color","#DC8EAA");
+            $("#head").css("background-color","#DC8EAA");
+            $("#title").css("color","white");
+            $("#p").css("color","#DC8EAA");
+            $(".el").css("color","white");
+            $(".el").css("background-color","#dba7ba");
+            $('.el').hover(function(){
+                $(this).css("background-color","#DC8EAA")},
+                    function () {$(this).css("background-color","#dba7ba")});
         }
         else if ("{{action}}" == "authorization"){
             $("#p").text("Enter the user, choose the option and click on the desired project");
-            $("#p").addClass("w3-text-blue");
             $("#authorization").show();
             document.getElementById("title").innerHTML = "Authorize a user to annotate your project"; 
-            document.getElementById("bar").classList.add("w3-blue");
             document.getElementById("auth").classList.add("w3-white");
-            document.getElementById("head").classList.add("w3-blue");
-            $(".el").addClass("w3-hover-blue w3-pale-blue");
+            $("#bar").css("background-color","#B383AF");
+            $("#head").css("background-color","#B383AF");
+            $("#title").css("color","white");
+            $("#p").css("color","#B383AF");
+            $(".el").css("color","white");
+            $(".el").css("background-color","#b59cb3");
+            $('.el').hover(function(){
+                $(this).css("background-color","#B383AF")},
+                    function () {$(this).css("background-color","#b59cb3")});
         }
 }
 

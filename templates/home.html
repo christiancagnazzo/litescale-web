@@ -1,33 +1,14 @@
 {% include 'header.html' %}
 
-<!-- Header -->
-<header class="w3-container w3-green w3-center" style="padding-top:40px">
-  <h1 class="w3-margin">Welcome to LITESCALE</h1>
-</header>
-
-<!-- First Grid -->
-<div class="w3-row-padding w3-padding-64 w3-container w3-white">
-  <div class="w3-content">
-    <div>
-      <h1>Annotate your project with the BWS method</h1>
-      <h5 class="w3-padding-10">The Best-Worst Scaling model (BWS) is a comparative annotation process
-                                developed by Louviere and Woodworth (1991).
-                                In a nutshell, a BWS model presents annotators
-                                with n items at a time (where n > 1 and nor-
-                                mally n = 4) and asks them to pick the best and
-                                worst ones with regard to a given property. The
-                                model has been used in particular by Kiritchenko
-                                and Mohammad (2017) and Mohammad and Kir-
-                                itchenko (2018), who proved it to be particularly
-                                effective for subjective tasks such as sentiment in-
-                                tensity annotation, which are intrinsically nuanced
-                                and hardly fit in any fixed scale.</h5>
-    </div>
+<div class="bgimg-1 ">
+  <div class="w3-display-middle" style="white-space:nowrap;">
+    <span style="font-size:100px;"class="w3-center w3-padding-large w3-black w3-wide ">LITESCALE</span>
   </div>
 </div>
 
-<!-- Second Grid -->
-<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container w3-grey">
+
+<div class="w3-row w3-center w3-dark-grey w3-padding-16">
+  <div class="w3-row-padding w3-padding-64 w3-container">
   <div class="w3-content">
     <div>
       <h1>BWS</h1>
@@ -36,7 +17,10 @@
                                 In a nutshell, a BWS model presents annotators
                                 with n items at a time (where n > 1 and nor-
                                 mally n = 4) and asks them to pick the best and
-                                worst ones with regard to a given property. The
+                                worst ones with regard 4) and asks them to pick the best and
+                                worst ones with regard 4) and asks them to pick the best and
+                                worst ones wi4) and asks them to pick the best and
+                                worst ones with regard th regard to a given property. The
                                 model has been used in particular by Kiritchenko
                                 and Mohammad (2017) and Mohammad and Kir-
                                 itchenko (2018), who proved it to be particularly
@@ -46,6 +30,19 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- About -->
+<div class="w3-content w3-container w3-padding-64" id="about">
+  <h3 class="w3-center">ABOUT ME</h3>
+  <p>We have created a fictional "personal" website/blog, and our fictional character is a hobby photographer. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+    qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+</div>
+
+
+ 
+
 
 <script>
 window.onload = function(){
@@ -58,8 +55,6 @@ window.onload = function(){
   $("#del").hide();
   $("#auth").hide();
   $("#ar").hide();
-  document.getElementById("bar").classList.add("w3-green");
-  document.getElementById("home").classList.add("w3-white");
   if ("{{user}}"){
     $("#out").show();
     $("#start").show();
