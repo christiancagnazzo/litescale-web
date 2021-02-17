@@ -87,7 +87,7 @@ class UsersAPI(Resource):
         email = args['email']
         password = args['password']
         
-        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+        regex = "^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$"
         pat = re.compile(regex)
         if not re.search(pat,email): 
             raise InvalidEmailError
@@ -106,7 +106,36 @@ class UsersAPI(Resource):
         mail = {
         'from' : 'ciaociao.d@virgilio.it',
         'object' : 'LITESCALE - CONFIRM REGISTRATION',
-        'message' : 'Welcome '+email+',<br> Log in now and start to annotate!<br> http://127.0.0.1:5002/home'
+        'message' : '<html> \
+                        <head> \
+                            <style> \
+                            body { \
+                                background-color: #F3F5F9; \
+                            }\
+                            div {\
+                                font-size: 50px;\
+                                text-align: center;\
+                                color: #1A535C;\
+                            }\
+                            span {\
+                                font-size: 50px;\
+                                background-color: #1A535C;\
+                                color: white;\
+                                padding: 10px;\
+                            }\
+                            a {\
+                                color: #1A535C;\
+                            }\
+                            </style> \
+                        </head> \
+                        <body> \
+                            <div> \
+                                <span>LITESCALE</span> \
+                                <p>Welcome, '+email+'<p> \
+                                <a href="http://lite-env.eba-jhijbmtj.eu-west-3.elasticbeanstalk.com/home">Log-In<a> Now And Annotate Your Projects \
+                            </div> \
+                        </body> \
+                    </html>'
         }
         
         # Connect to server
@@ -430,8 +459,37 @@ class AuthorizationAPI(Resource):
         mail = {
         'from' : 'ciaociao.d@virgilio.it',
         'object' : 'LITESCALE - YOU HAVE BEEN AUTHORIZED TO A NEW PROJECT',
-        'message' : 'Ehi '+user_to+',<br>'+email+' has just authorized you to his project.<br> Log in now and start to annotate!<br> http://127.0.0.1:5002/home'
-        }
+        'message' : '<html> \
+                        <head> \
+                            <style> \
+                            body { \
+                                background-color: #F3F5F9; \
+                            }\
+                            div {\
+                                font-size: 50px;\
+                                text-align: center;\
+                                color: #1A535C;\
+                            }\
+                            span {\
+                                font-size: 50px;\
+                                background-color: #1A535C;\
+                                color: white;\
+                                padding: 10px;\
+                            }\
+                            a {\
+                                color: #1A535C;\
+                            }\
+                            </style> \
+                        </head> \
+                        <body> \
+                            <div> \
+                                <span>LITESCALE</span> \
+                                <p>Ehi, '+user_to+'<p> \
+                                <p>'+email+' has just authorized you to his project.<p> \
+                                <a href="http://lite-env.eba-jhijbmtj.eu-west-3.elasticbeanstalk.com/home">Log-In<a> Now And Annotate Your Projects \
+                            </div> \
+                        </body> \
+                    </html>'}
         
         # Connect to server
         server = smtplib.SMTP_SSL('out.virgilio.it', 465)
