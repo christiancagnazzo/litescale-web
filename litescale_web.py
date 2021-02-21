@@ -361,6 +361,10 @@ def gold():
     else:
         return redirect('login')
 
+@app.route('/example')
+def example():
+    return redirect(url_for('static', filename='example.tsv'))
+
 # ---------------------------------------------------------------------------------------------------- #
 
 
