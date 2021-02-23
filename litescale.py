@@ -1,5 +1,6 @@
 from math import floor, gcd
 from db import *
+import csv
 
 ERROR = 0
 NOT_ERROR = 1
@@ -161,10 +162,11 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
 
     # Insert instance into the db
     instances = []
-    with open(instance_file) as f:
+    with open(instance_file, encoding='utf-8') as f:
+        tsv_file = csv.reader(f,delimiter="\t")
         try:
-            for line in f:
-                id, text = line.strip().split("\t")
+            for row in tsv_file:
+                id, text = int(row[0]), row[1]
                 instances.append({"id": id, "text": text})
                 db.insert('Instance', INSERT_IGNORE, id, text, project_id)
         except:

@@ -33,7 +33,7 @@
             <td>{{project['phenomenon']}}</td>
             <td>{{project['tuplesize']}}</td>
             <td>{{project['replicate']}}</td>
-            <td>{{progress_list[project['projectId']]}}%</td>
+            <td>{{'%0.2f' % progress_list[project['projectId']] |float}}%</td>
             <td>{{project['projectOwner']}}</td>
         </tr>    
         {% endfor %}

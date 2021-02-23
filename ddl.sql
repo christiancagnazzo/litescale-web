@@ -25,7 +25,7 @@ create table Authorization (
 
 create table Instance (
     InstanceId integer,
-    InstanceDescription varchar(50) not null,
+    InstanceDescription varchar(500) not null,
     Project integer,
     primary key (InstanceId, Project),
     foreign key (Project) references Project(ProjectId) on update cascade on delete cascade,

@@ -273,10 +273,10 @@ class ProjectsAPI(Resource):
             raise MissingProjectInfoError
         
         instance_file =  request.files['file']
-        file_name, extension = os.path.splitext(instance_file.filename)
+        #file_name, extension = os.path.splitext(instance_file.filename)
     
-        if extension != ".tsv":
-            raise InvalidFileUploadError
+        #if extension != ".tsv":
+        #    raise InvalidFileUploadError
         
         instance_file.save('instance_file.tsv')
         project_name = info['project_name']
