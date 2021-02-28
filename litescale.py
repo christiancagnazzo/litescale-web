@@ -168,7 +168,9 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
             for row in tsv_file:
                 id, text = int(row[0]), row[1]
                 instances.append({"id": id, "text": text})
-                db.insert('Instance', INSERT_IGNORE, id, text, project_id)
+                res = db.insert('Instance', INSERT, id, text, project_id)
+                if not isinstance(res,int):
+                    raise
         except:
             condition = 'ProjectId = %s'
             db.delete('Project', condition, project_id)

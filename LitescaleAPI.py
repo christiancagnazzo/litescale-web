@@ -12,6 +12,7 @@ from litescale import *
 import json
 import os
 import re
+from string import Template
 
 AUTHORIZED = 'authorized'
 OWNER = 'owner'
@@ -103,39 +104,15 @@ class UsersAPI(Resource):
         if not result:
             raise EmailAlreadyExistsError
 
+        with open('templates/welcome.html', 'r') as f:
+            body = f.read()
+         
+        body = Template(body).safe_substitute(user=email)
+        
         mail = {
         'from' : 'ciaociao.d@virgilio.it',
         'object' : 'LITESCALE - CONFIRM REGISTRATION',
-        'message' : '<html> \
-                        <head> \
-                            <style> \
-                            body { \
-                                background-color: #F3F5F9; \
-                            }\
-                            div {\
-                                font-size: 50px;\
-                                text-align: center;\
-                                color: #1A535C;\
-                            }\
-                            span {\
-                                font-size: 50px;\
-                                background-color: #1A535C;\
-                                color: white;\
-                                padding: 10px;\
-                            }\
-                            a {\
-                                color: #1A535C;\
-                            }\
-                            </style> \
-                        </head> \
-                        <body> \
-                            <div> \
-                                <span>LITESCALE</span> \
-                                <p>Welcome, '+email+'<p> \
-                                <a href="http://lite-env.eba-jhijbmtj.eu-west-3.elasticbeanstalk.com/home">Log-In<a> Now And Annotate Your Projects \
-                            </div> \
-                        </body> \
-                    </html>'
+        'message' : body 
         }
         
         # Connect to server
@@ -456,40 +433,16 @@ class AuthorizationAPI(Resource):
         if not rst:
             return {'result': 'False'}
         
+        with open('templates/auth.html', 'r') as f:
+            body = f.read()
+         
+        body = Template(body).safe_substitute(user=email,user_to=user_to)
+        
         mail = {
         'from' : 'ciaociao.d@virgilio.it',
-        'object' : 'LITESCALE - YOU HAVE BEEN AUTHORIZED TO A NEW PROJECT',
-        'message' : '<html> \
-                        <head> \
-                            <style> \
-                            body { \
-                                background-color: #F3F5F9; \
-                            }\
-                            div {\
-                                font-size: 50px;\
-                                text-align: center;\
-                                color: #1A535C;\
-                            }\
-                            span {\
-                                font-size: 50px;\
-                                background-color: #1A535C;\
-                                color: white;\
-                                padding: 10px;\
-                            }\
-                            a {\
-                                color: #1A535C;\
-                            }\
-                            </style> \
-                        </head> \
-                        <body> \
-                            <div> \
-                                <span>LITESCALE</span> \
-                                <p>Ehi, '+user_to+'<p> \
-                                <p>'+email+' has just authorized you to his project.<p> \
-                                <a href="http://lite-env.eba-jhijbmtj.eu-west-3.elasticbeanstalk.com/home">Log-In<a> Now And Annotate Your Projects \
-                            </div> \
-                        </body> \
-                    </html>'}
+        'object' : 'LITESCALE - NEW PROJECT!',
+        'message' : body 
+        }
         
         # Connect to server
         server = smtplib.SMTP_SSL('out.virgilio.it', 465)
