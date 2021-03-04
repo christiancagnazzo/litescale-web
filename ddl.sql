@@ -1,5 +1,5 @@
 create table _User (
-    Email varchar(35),
+    Email varchar(100),
     Password varchar(200),
     primary key (Email)
 );
@@ -17,19 +17,18 @@ create table Project (
 
 create table Authorization (
     Project integer,
-    Authorized varchar(35),
+    Authorized varchar(100),
     primary key (Project, Authorized),
     foreign key (Project) references Project(ProjectId) on update cascade on delete cascade,
     foreign key (Authorized) references _User(Email) on update cascade on delete cascade
 );
 
 create table Instance (
-    InstanceId integer,
+    InstanceId varchar(100),
     InstanceDescription varchar(500) not null,
     Project integer,
     primary key (InstanceId, Project),
-    foreign key (Project) references Project(ProjectId) on update cascade on delete cascade,
-    unique (InstanceDescription, Project)
+    foreign key (Project) references Project(ProjectId) on update cascade on delete cascade
 );
 
 create table Tuple (
@@ -40,7 +39,7 @@ create table Tuple (
 );
 
 create table InstanceTuple (
-    Instance integer,
+    Instance varchar(100),
     Tuple integer,
     Project integer,
     primary key (Instance, Tuple, Project),
@@ -50,10 +49,10 @@ create table InstanceTuple (
 
 create table Annotation (
     AnnotationId integer AUTO_INCREMENT,
-    Best integer,
-    Worst integer,
+    Best varchar(100),
+    Worst varchar(100),
     Tuple integer,
-    Annotator varchar(35),
+    Annotator varchar(100),
     Project integer,
     primary key (AnnotationId),
     foreign key (Annotator) references _User(Email) on update cascade on delete cascade,

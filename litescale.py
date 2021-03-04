@@ -166,7 +166,7 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
         tsv_file = csv.reader(f,delimiter="\t")
         try:
             for row in tsv_file:
-                id, text = int(row[0]), row[1]
+                id, text = row[0], row[1]
                 instances.append({"id": id, "text": text})
                 res = db.insert('Instance', INSERT, id, text, project_id)
                 if not isinstance(res,int):
@@ -188,14 +188,8 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
     for tup_id, tup in tuples.items():
         db.insert('Tuple', INSERT_IGNORE, tup_id, project_id)
         for instance in tup:
-            # Unique instances in each project
-            query = "SELECT InstanceId FROM Instance WHERE InstanceDescription = %s AND Project = %s"
-            instance_id = db.select_advanced(query,
-                                             ('InstanceDescription',
-                                              instance["text"]),
-                                             ('Project', project_id))
-            db.insert('InstanceTuple', INSERT_IGNORE,
-                      instance_id[0], tup_id, project_id)
+            db.insert('InstanceTuple', INSERT,
+                      instance['id'], tup_id, project_id)
 
     db.close()
     return project_id, "Project create correctly"

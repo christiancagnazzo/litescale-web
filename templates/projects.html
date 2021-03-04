@@ -58,29 +58,29 @@ window.onload = function(){
         $("#delAcc").hide();
         $("#authorization").hide();
         if ("{{action}}" == "start"){
-            $("#bar").css("background-color","#2E637B");
+            $("#bar").css("background-color","#E4740C");
             document.getElementById("start").classList.add("w3-white");
-            $("#head").css("background-color","#2E637B");
+            $("#head").css("background-color","#E4740C");
             document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
             $("#title").css("color","white");
             $(".el").css("color","white");
             $("#p").text("Click the project you want to annotate");
-            $("#p").css("color","#2E637B");
-            $(".el").css("background-color","#4084a3");
+            $("#p").css("color","#E4740C");
+            $(".el").css("background-color","#E4740C");
             $('.el').hover(function(){
-                $(this).css("background-color","#2E637B")},
-                    function () {$(this).css("background-color","#4084a3")});        
+                $(this).css("background-color","#E4CB0C")},
+                    function () {$(this).css("background-color","#E4740C")});        
         }
         else if ("{{action}}" == "gold"){
-            $("#bar").css("background-color","#837AA9");
-            $("#head").css("background-color","#837AA9");
+            $("#bar").css("background-color","#E4740C");
+            $("#head").css("background-color","#E4740C");
             $("#title").css("color","white");
-            $("#p").css("color","#837AA9");
+            $("#p").css("color","#E4740C");
             $(".el").css("color","white");
-            $(".el").css("background-color","#9792a8");
+            $(".el").css("background-color","#E4740C");
             $('.el').hover(function(){
-                $(this).css("background-color","#837AA9")},
-                    function () {$(this).css("background-color","#9792a8")});
+                $(this).css("background-color","#E4CB0C")},
+                    function () {$(this).css("background-color","#E4740C")});
             $("#p").text("Click the project of which you want to generate the gold file");
             document.getElementById("title").innerHTML = "Generate the gold standard file of a project";
             document.getElementById("gold").classList.add("w3-white");
