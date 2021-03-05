@@ -8,12 +8,12 @@
 
 <div class="w3-container" style="width:35%; margin: 0 auto;">
     <form style="text-align:left; padding:30px;"class="w3-container" name="new" action="" method="post" enctype="multipart/form-data">
-        <label style="color:#547097">Project name</label>
+        <label style="color:#e4740c">Project name</label>
         <input class="w3-input w3-border w3-light-grey" name="project_name" type="text" size="40"/><br/>
-        <label style="color:#547097">Phenomenon (e.g., offensive, positive)</label>
+        <label style="color:#e4740c">Phenomenon (e.g., offensive, positive)</label>
         <input class="w3-input w3-border w3-light-grey" name="phenomenon" type="text" /><br/>
     
-        <label style="color:#547097">Dimension of the tuples</label>
+        <label style="color:#e4740c">Dimension of the tuples</label>
         <select class="w3-select" name="tuple_size">
             <option value="2">2</option>
             <option value="3">3</option>
@@ -26,7 +26,7 @@
             <option value="10">10</option>
         </select><br/>
 
-        <label style="color:#547097">Replication of the instances</label>
+        <label style="color:#e4740c">Replication of the instances</label>
         <select class="w3-select" name="replication">
             <option value="2">2</option>
             <option value="3">3</option>
@@ -39,7 +39,7 @@
             <option value="10">10</option>
         </select><br/>
         
-        <label style="color:#547097">Load instances from tab-separated file (<a href="/example">Example file</a>)</label>
+        <label style="color:#e4740c">Load instances from tab-separated file (<a href="/example">Example file</a>)</label>
         <input type="file" name="instance_file" /><br>
 
         <div class="create">
@@ -59,8 +59,8 @@ window.onload = function(){
     $("#in").hide();
     $("#delAcc").hide();
     $("#authorization").hide();
-    $("#bar").css("background-color","#547097");
-    $("#head").css("background-color","#547097");
+    $("#bar").css("background-color","#e4740c");
+    $("#head").css("background-color","#e4740c");
     $("#title").css("color","white");
     document.getElementById("new").classList.add("w3-white");
 }

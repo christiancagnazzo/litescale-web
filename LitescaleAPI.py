@@ -320,8 +320,8 @@ class AnnotationsAPI(Resource):
     user_args = {
         "project_id": fields.Int(required=True),
         "tup_id": fields.Int(required=True),
-        "answer_best": fields.Int(required=True),
-        "answer_worst": fields.Int(required=True)
+        "answer_best": fields.String(required=True),
+        "answer_worst": fields.String(required=True)
     }
 
     # Add annotation into db

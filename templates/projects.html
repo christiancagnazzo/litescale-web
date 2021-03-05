@@ -58,61 +58,61 @@ window.onload = function(){
         $("#delAcc").hide();
         $("#authorization").hide();
         if ("{{action}}" == "start"){
-            $("#bar").css("background-color","#E4740C");
+            $("#bar").css("background-color","#e68124");
             document.getElementById("start").classList.add("w3-white");
-            $("#head").css("background-color","#E4740C");
+            $("#head").css("background-color","#e68124");
             document.getElementById("title").innerHTML = "Start or continue to annotate yours projects"
             $("#title").css("color","white");
             $(".el").css("color","white");
             $("#p").text("Click the project you want to annotate");
-            $("#p").css("color","#E4740C");
-            $(".el").css("background-color","#E4740C");
+            $("#p").css("color","#e68124");
+            $(".el").css("background-color","#e68124");
             $('.el').hover(function(){
                 $(this).css("background-color","#E4CB0C")},
-                    function () {$(this).css("background-color","#E4740C")});        
+                    function () {$(this).css("background-color","#e68124")});        
         }
         else if ("{{action}}" == "gold"){
-            $("#bar").css("background-color","#E4740C");
-            $("#head").css("background-color","#E4740C");
+            $("#bar").css("background-color","#cd680a");
+            $("#head").css("background-color","#cd680a");
             $("#title").css("color","white");
-            $("#p").css("color","#E4740C");
+            $("#p").css("color","#cd680a");
             $(".el").css("color","white");
-            $(".el").css("background-color","#E4740C");
+            $(".el").css("background-color","#cd680a");
             $('.el').hover(function(){
                 $(this).css("background-color","#E4CB0C")},
-                    function () {$(this).css("background-color","#E4740C")});
+                    function () {$(this).css("background-color","#cd680a")});
             $("#p").text("Click the project of which you want to generate the gold file");
             document.getElementById("title").innerHTML = "Generate the gold standard file of a project";
             document.getElementById("gold").classList.add("w3-white");
             }
         else if ("{{action}}" == "delete"){
+            $("#bar").css("background-color","#9f5108");
             $("#p").text("Click the project you want to delete");
             document.getElementById("title").innerHTML = "Delete a your project"; 
             document.getElementById("del").classList.add("w3-white");
-            $("#bar").css("background-color","#DC8EAA");
-            $("#head").css("background-color","#DC8EAA");
+            $("#head").css("background-color","#9f5108");
             $("#title").css("color","white");
-            $("#p").css("color","#DC8EAA");
+            $("#p").css("color","#9f5108");
             $(".el").css("color","white");
-            $(".el").css("background-color","#dba7ba");
+            $(".el").css("background-color","#9f5108");
             $('.el').hover(function(){
-                $(this).css("background-color","#DC8EAA")},
-                    function () {$(this).css("background-color","#dba7ba")});
+                $(this).css("background-color","#E4CB0C")},
+                    function () {$(this).css("background-color","#9f5108")});
         }
         else if ("{{action}}" == "authorization"){
+            $("#bar").css("background-color","#b65c09");
             $("#p").text("Enter the user, choose the option and click on the desired project");
             $("#authorization").show();
             document.getElementById("title").innerHTML = "Authorize a user to annotate your project"; 
             document.getElementById("auth").classList.add("w3-white");
-            $("#bar").css("background-color","#B383AF");
-            $("#head").css("background-color","#B383AF");
+            $("#head").css("background-color","#b65c09");
             $("#title").css("color","white");
-            $("#p").css("color","#B383AF");
+            $("#p").css("color","#b65c09");
             $(".el").css("color","white");
-            $(".el").css("background-color","#b59cb3");
+            $(".el").css("background-color","#b65c09");
             $('.el').hover(function(){
-                $(this).css("background-color","#B383AF")},
-                    function () {$(this).css("background-color","#b59cb3")});
+                $(this).css("background-color","#E4CB0C")},
+                    function () {$(this).css("background-color","#b65c09")});
         }
 }
 
