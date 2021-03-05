@@ -39,7 +39,7 @@ form select {
 input.instance {
     border: 0;
     border-radius: 0px;
-    background-color: #c6ebd9;
+    background-color: #E4CB0C;
     display: block;
     clear:both;
     padding: 1em;
@@ -48,14 +48,15 @@ input.instance {
     margin-bottom: 0.5em;
     width: 95%;
     font-size: 20px;
+    color: #7C440C;
 }
 
 input.instance:hover {
-    background-color: #c5ff73;
+    background-color: #E4740C;
 }
 
 input.instance:disabled {
-    background-color: #8aba85;
+    background-color: #C4640C;
 }
 
 #instances {
@@ -66,8 +67,9 @@ input.instance:disabled {
     text-align: center;
     font-size: 20pt;
     border-style: solid;
-    border-color: teal;
+    border-color: #7C440C;
     margin: 0 auto;
     width: 300px;
+    color: white;
 }
  

@@ -1,7 +1,7 @@
 {% include 'header.html' %}
 
 <!-- Header -->
-<header class="w3-container w3-teal w3-center" style="padding-top:40px">
+<header class="w3-container w3-center" style="padding-top:40px; background-color:#E4740C; color:white;">
   <h1 class="w3-margin">Which is the <span id="bestworst">MOST</span> {{phenomenon}}?</h1>
 </header>
 
@@ -21,7 +21,7 @@
 </div>
 <hr>
 
-<div id="progress" class="w3-container w3-pale-green">
+<div id="progress" class="w3-container" style="background-color:#E4740C">
 {{progress}}
 </div>
 
@@ -42,7 +42,7 @@ window.onload = function(){
   $("#ar").hide();
   var a = $("<a href='/start' id='home' class='w3-bar-item w3-button w3-padding-large w3-hover-white'>< Back</a>")
   $("#bar").append(a);
-  document.getElementById("bar").classList.add("w3-teal");
+  $("#bar").css("background-color: #E4740C");
 }
 
 function annotate(id) {
