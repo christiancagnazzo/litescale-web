@@ -126,7 +126,9 @@ def check_owner(project_id, user):
     # Check project owner
 
 
-def make_tuples(instances, k, p):
+def make_tuples(instances, k, p, project_id):
+    db = Dbconnect()
+    
     n = len(instances)
 
     while gcd(n, k) != 1:
@@ -138,8 +140,12 @@ def make_tuples(instances, k, p):
     for j in range(p):
         for x in range(int(floor(n/k))):
             t = [(x*(k**(j+1)) + (i*(k**j))) % n for i in range(k)]
-            tuples[tuple_id] = [instances[x] for x in t]
+            db.insert('Tuple', INSERT_IGNORE, tuple_id, project_id)
+            for x in t:
+                db.insert('InstanceTuple', INSERT, instances[x]['id'], tuple_id, project_id)
             tuple_id += 1
+            
+    db.close()
     return tuples
     # Create tuples of a project
 
@@ -183,14 +189,7 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
         return ERROR, "Wrong instance file format"
 
     # Make tuples
-    tuples = make_tuples(instances, tuple_size, replication)
-
-    # Insert tuples in the database
-    for tup_id, tup in tuples.items():
-        db.insert('Tuple', INSERT_IGNORE, tup_id, project_id)
-        for instance in tup:
-            db.insert('InstanceTuple', INSERT,
-                      instance['id'], tup_id, project_id)
+    make_tuples(instances, tuple_size, replication, project_id)
 
     db.close()
     return project_id, "Project create correctly"
@@ -361,7 +360,6 @@ def annotate(project_id, user, tup_id, answer_best, answer_worst):
 
     db.close()
     return True
-    # ! return progress(project_id, user)
     # Insert annotation into the db
 
 
