@@ -7,10 +7,10 @@ create table _User (
 create table Project (
     ProjectId integer AUTO_INCREMENT,
     ProjectName varchar(35),
-    Phenomenon varchar(20) not null,
+    Phenomenon varchar(35) not null,
     TupleSize integer not null,
     ReplicateInstances integer not null,
-    ProjectOwner varchar(35),
+    ProjectOwner varchar(100),
     primary key (ProjectId),
     foreign key (ProjectOwner) references _User(Email) on update cascade on delete cascade
 );

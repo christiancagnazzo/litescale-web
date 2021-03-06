@@ -212,17 +212,6 @@ def new():
 def start():
     if 'user' in session: 
         user = session.get('user')
-        params = {'type': 'authorized'}
-        
-        rst, project_list, progress_list = get_project_list(params)
-        
-        if rst is None: 
-            session['current_location'] = request.path
-            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
-        elif not rst:
-            return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
-        elif 'Error' in project_list:
-            return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
         
         # POST -> save annotation into db
         if request.method == 'POST' and 'tup_id' in request.form:
@@ -267,40 +256,54 @@ def start():
                 response.raise_for_status()
                 
                 if 'Error' in tuples:  # no tuple
-                    progress_list[int(project_id)] = '100.0'
-                    return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list ,rep=True, msg=tuples['Error'])
-                
-                response = requests.get(make_url('Progress'), params=params, headers=make_header())
-                rspj = progress = response.json()
-                response.raise_for_status()
+                    raise 
                 
             except requests.exceptions.ConnectionError:
                 return render_template('error.html', msg="Could not connect to server")
             except:
                 if response.status_code == 500:
                     return render_template('error.html', msg="Internal server error")
+                
                 if response.status_code == 401:
-                    if 'message' in project_list and 'sub_status' in project_list['message']:
-                        status_code = project_list['message']['sub_status']
-                        if status_code == 40: # token expired
-                            result = refresh_token()
-                            if result:
-                                return redirect(request.url, code=307)
-                            else:
-                                session['current_location'] = request.path
-                                return render_template('login.html', error=True, msg='Session expired. Re-login, please')
                     session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                
+                
+                params = {'type': 'authorized'}
+                
+                rst, project_list, progress_list = get_project_list(params)
+                
+                if rst is None: 
+                    session['current_location'] = request.path
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                elif not rst:
+                    return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
+                elif 'Error' in project_list:
+                    return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
+                
                 return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list, rep=True, msg=rspj['Error'])
             
 
-            done = progress['done']
-            total = progress['total']
-            progress_string = 'Progress: {0}/{1} {2:.1f}%'.format(
+            done = tuples['done']
+            total = tuples['total']
+            progress_string = 'Progress: {0}/{1} {2:.2f}%'.format(
                 done, total, 100.0*(done/total))
 
             # tuple
             return render_template('annotation.html', project_id=project_id, phenomenon=project_dict['phenomenon'], user=user, tup_id=tuples['tup_id'], tup=tuples['tup'], progress=progress_string)
+        
+        
+        params = {'type': 'authorized'}
+        
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            session['current_location'] = request.path
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+        elif not rst:
+            return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['message'])
+        elif 'Error' in project_list:
+            return render_template('projects.html', user=user, action='start', rep=True, msg=project_list['Error'])
         
         # GET -> project list
         return render_template('projects.html', user=user, action='start', project_list=project_list, progress_list=progress_list)
@@ -318,19 +321,7 @@ def start():
 def gold():
     if 'user' in session: 
         user = session.get('user')
-        
-        params = {'type': 'authorized'}
-        
-        rst, project_list, progress_list = get_project_list(params)
-        
-        if rst is None: 
-            session['current_location'] = request.path
-            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
-        elif not rst:
-            return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
-        elif 'Error' in project_list:
-            return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['Error'])
-        
+         
         # POST
         if request.method == 'POST':
             project_id = request.form['project_id']
@@ -347,6 +338,19 @@ def gold():
                 if response.status_code == 401:
                     session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                
+                params = {'type': 'authorized'}
+        
+                rst, project_list, progress_list = get_project_list(params)
+                
+                if rst is None: 
+                    session['current_location'] = request.path
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                elif not rst:
+                    return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
+                elif 'Error' in project_list:
+                    return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['Error'])
+            
                 responsej = response.json()
                 return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
          
@@ -356,6 +360,18 @@ def gold():
 
             return redirect(url_for('static', filename='gold.tsv'))
 
+        params = {'type': 'authorized'}
+        
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            session['current_location'] = request.path
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+        elif not rst:
+            return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['message'])
+        elif 'Error' in project_list:
+            return render_template('projects.html', user=user, action='gold', rep=True, msg=project_list['Error'])
+       
         # GET
         return render_template('projects.html', user=user, action='gold', project_list=project_list, progress_list=progress_list)
     else:
@@ -376,18 +392,6 @@ def delete():
     if 'user' in session: 
         user = session.get('user')
         
-        params = {'type': 'owner'}
-        
-        rst, project_list, progress_list = get_project_list(params)
-        
-        if rst is None: 
-            session['current_location'] = request.path
-            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
-        elif not rst:
-            return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
-        elif 'Error' in project_list:
-            return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
-        
         # POST
         if request.method == 'POST':
             project_id = request.form['project_id']
@@ -406,6 +410,19 @@ def delete():
                 if response.status_code == 401:
                     session['current_location'] = request.path
                     return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                
+                params = {'type': 'owner'}
+        
+                rst, project_list, progress_list = get_project_list(params)
+                
+                if rst is None: 
+                    session['current_location'] = request.path
+                    return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+                elif not rst:
+                    return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
+                elif 'Error' in project_list:
+                    return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
+        
                 return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg=responsej['message'])
      
             # -> PROJECT DELETED
@@ -424,6 +441,18 @@ def delete():
                 
             return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list, rep=True, msg='Project deleted')
         
+        params = {'type': 'owner'}
+        
+        rst, project_list, progress_list = get_project_list(params)
+        
+        if rst is None: 
+            session['current_location'] = request.path
+            return render_template('login.html', error=True, msg='Session expired. Re-login, please')
+        elif not rst:
+            return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['message'])
+        elif 'Error' in project_list:
+            return render_template('projects.html', user=user, action='delete', rep=True, msg=project_list['Error'])
+         
         # project list
         return render_template('projects.html', user=user, action='delete', project_list=project_list, progress_list=progress_list)
     else:

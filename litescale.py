@@ -196,6 +196,30 @@ def new_project(user, project_name, phenomenon, tuple_size, replication, instanc
     # Create a new project
 
 
+def get_project_info(project_id):
+    db = Dbconnect()
+    condition = "ProjectId = %s"
+    result = db.select('Project', condition,
+                       'ProjectName',
+                       'Phenomenon',
+                       'TupleSize',
+                       'ReplicateInstances',
+                       'ProjectOwner',
+                       ProjectId=project_id)
+
+    if result == []:
+        return ERROR, "Project not found"
+
+    project_dict = {
+        "project_name": result[0][0],
+        "phenomenon": result[0][1],
+        "tuple_size": result[0][2],
+        "replication": result[0][3],
+        "owner": result[0][4],
+    }
+    
+    return NOT_ERROR, project_dict
+
 def get_project(project_id):
     db = Dbconnect()
     condition = "ProjectId = %s"
@@ -268,15 +292,15 @@ def next_tuple(project_id, user):
     rst, project_dict = get_project(project_id)
 
     if not rst:
-        return None, None
+        return None, None, None, None
 
     annotations = get_annotations(project_id, user)
 
     for tup_id, tup in project_dict["tuples"].items():
         if tup_id in annotations:
             continue
-        return tup_id, tup
-    return None, None
+        return tup_id, tup, len(annotations), len(project_dict["tuples"])
+    return None, None, None, None
     # Return the next tuple to annotate
 
 
@@ -326,7 +350,8 @@ def annotate(project_id, user, tup_id, answer_best, answer_worst):
               Project=project_id)
 
     db.close()
-    return progress(project_id, user)
+    return True
+    # ! return progress(project_id, user)
     # Insert annotation into the db
 
 

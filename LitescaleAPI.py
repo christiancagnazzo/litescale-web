@@ -198,7 +198,7 @@ class ProjectsAPI(Resource):
         email = get_jwt_identity()
         project_id = args['project_id']
 
-        rst, project_dict = get_project(project_id)
+        rst, project_dict = get_project_info(project_id)
 
         if not rst:
             raise ResourceNotFoundError
@@ -301,12 +301,12 @@ class TuplesAPI(Resource):
         if not rst:
             raise UnauthorizedProjectError
 
-        tup_id, tup = next_tuple(project_id, email)
+        tup_id, tup, done, total = next_tuple(project_id, email)
 
         if tup is None:
             return {"Error": "No tuple to annotate"}
 
-        return jsonify({'tup_id': tup_id, 'tup': tup})
+        return jsonify({'tup_id': tup_id, 'tup': tup, 'done': done, 'total': total})
 
 # ---------------------------------------------------------------------------------------------------- #
 
@@ -339,8 +339,8 @@ class AnnotationsAPI(Resource):
         if not rst:
             raise UnauthorizedProjectError
 
-        x, y = annotate(project_id, email, tup_id, answer_best, answer_worst)
-        return jsonify({"Annotations": x, "Tuples": y})
+        annotate(project_id, email, tup_id, answer_best, answer_worst)
+        return jsonify({"Result" : "True"})
 
 # ---------------------------------------------------------------------------------------------------- #
 
