@@ -1,6 +1,7 @@
 from math import floor, gcd
 from db import *
 import csv
+import json
 
 ERROR = 0
 NOT_ERROR = 1
@@ -289,29 +290,45 @@ def get_annotations(project_id, user):
 
 
 def next_tuple(project_id, user):
-    rst, project_dict = get_project(project_id)
-
-    if not rst:
+    db = Dbconnect()
+    
+    query = "SELECT TupleId FROM Tuple WHERE Project=%s"
+    result = db.select_advanced(query, ('Project', project_id))
+    
+    if result == [] or (not isinstance(result,type([]))):
         return None, None, None, None
-
+    
     annotations = get_annotations(project_id, user)
 
-    for tup_id, tup in project_dict["tuples"].items():
-        if tup_id in annotations:
+    for t_id in result:
+        if t_id in annotations:
             continue
-        return tup_id, tup, len(annotations), len(project_dict["tuples"])
+        
+        query = "SELECT Instance.InstanceId, Instance.InstanceDescription \
+                FROM Instance JOIN InstanceTuple ON (Instance.InstanceId=InstanceTuple.Instance \
+                AND InstanceTuple.Project=Instance.Project) \
+                WHERE InstanceTuple.Tuple = %s AND InstanceTuple.Project = %s"
+        tup = db.select_advanced(query, ('InstanceTuple.Tuple', t_id),('InstanceTuple.Project', project_id))
+        tupl = []
+        for x in tup:
+            tupl.append({"id":x[0],"text":x[1]})
+        
+        return t_id, tupl, len(annotations), len(result)
     return None, None, None, None
     # Return the next tuple to annotate
 
 
 def progress(project_id, user):
-    rst, project_dict = get_project(project_id)
-
-    if not rst:
+    db = Dbconnect()
+    
+    sql = "SELECT COUNT(*) FROM Tuple WHERE Project = %s"
+    num_tuples = db.select_advanced(sql, ('Project', project_id))
+    
+    if num_tuples == [] or (not isinstance(num_tuples,type([]))):
         return None, None
-
+    
     annotations = get_annotations(project_id, user)
-    return len(annotations), len(project_dict["tuples"])
+    return len(annotations), num_tuples[0]
     # Progress of annotations
 
 
@@ -332,13 +349,6 @@ def empty_annotations(project_id):
 
 
 def annotate(project_id, user, tup_id, answer_best, answer_worst):
-    annotations = get_annotations(project_id, user)
-
-    annotations[tup_id] = {
-        "best": answer_best,
-        "worst": answer_worst
-    }
-
     db = Dbconnect()
 
     db.insert('Annotation',
