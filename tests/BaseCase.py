@@ -4,7 +4,7 @@ from LitescaleAPI import app
 from litescale import delete_user
 
 EMAIL_TEST = "test@mail.com"
-PASSWORD_TEST = "pwd"
+PASSWORD_TEST = "Root1!"
 
 class BaseCase(unittest.TestCase):
 

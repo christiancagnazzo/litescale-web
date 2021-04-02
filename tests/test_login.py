@@ -30,7 +30,7 @@ class TestUserLogin(BaseCase):
         
         self.assertEqual("Invalid username or password", response.json['message'])
         self.assertEqual(401, response.status_code)
-        
+                
     def test_login_with_invalid_pw(self):
         payload = {
             "email": EMAIL_TEST,

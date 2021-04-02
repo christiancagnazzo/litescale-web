@@ -412,9 +412,11 @@ def generate_gold(project_id):
     scores_normalized = {id: (s-min_score)/(max_score-min_score)
                          for id, s in scores.items()}
 
+    score_ordered = sorted(scores_normalized.items(), key=lambda x: x[1], reverse = True)
+
     result = ""
-    for id in ids:
+    for id in score_ordered:
         result += "{0}\t{1}\t{2}\n".format(
-            id, texts[id], scores_normalized[id])
+            id[0], texts[id[0]], scores_normalized[id[0]])
 
     return NOT_ERROR, result
